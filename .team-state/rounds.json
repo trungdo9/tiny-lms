@@ -1,0 +1,47 @@
+[
+  {
+    "taskId": "tinylms-20260327-quiz-course-refactor",
+    "rounds": [
+      { "name": "analysis", "owner": "Linh_Orchestrator", "status": "done" },
+      { "name": "implementation", "owner": "Khoa_Backend_Engineer", "status": "done" },
+      { "name": "review", "owner": "Linh_Orchestrator", "status": "in_progress" },
+      { "name": "qa", "owner": "Huy_Tester", "status": "todo" }
+    ]
+  },
+  {
+    "taskId": "tinylms-20260327-course-management-ui",
+    "rounds": [
+      { "name": "analysis", "owner": "Linh_Orchestrator", "status": "done" },
+      { "name": "implementation", "owner": "Y_Frontend", "status": "done" },
+      { "name": "review", "owner": "Minh_Review", "status": "in_progress" },
+      { "name": "qa", "owner": "Huy_Tester", "status": "todo" }
+    ]
+  },
+  {
+    "taskId": "tinylms-20260327-course-management-infra",
+    "rounds": [
+      { "name": "analysis", "owner": "Linh_Orchestrator", "status": "done" },
+      { "name": "implementation", "owner": "Y_Frontend", "status": "done" },
+      { "name": "review", "owner": "Minh_Review", "status": "in_progress" },
+      { "name": "qa", "owner": "Huy_Tester", "status": "todo" }
+    ]
+  },
+  {
+    "taskId": "tinylms-20260328-instructor-management",
+    "rounds": [
+      { "name": "analysis", "owner": "Linh_Orchestrator", "status": "done" },
+      { "name": "implementation", "owner": "Y_Frontend", "status": "done" },
+      { "name": "review", "owner": "Minh_Review", "status": "in_progress" },
+      { "name": "qa", "owner": "Huy_Tester", "status": "todo" }
+    ]
+  },
+  {
+    "taskId": "tinylms-20260328-course-outline-dnd",
+    "rounds": [
+      { "name": "analysis", "owner": "Linh_Orchestrator", "status": "done" },
+      { "name": "implementation", "owner": "Y_Frontend", "status": "done" },
+      { "name": "qa", "owner": "Huy_Tester", "status": "todo" },
+      { "name": "finalize", "owner": "Linh_Orchestrator", "status": "todo" }
+    ]
+  }
+]

@@ -1,0 +1,106 @@
+[
+  {
+    "taskId": "tinylms-20260327-quiz-course-refactor",
+    "title": "Close remaining action-required items in quiz-course-refactor",
+    "plan": "20260228-quiz-course-refactor",
+    "owner": "Linh_Orchestrator",
+    "state": "review",
+    "round": "review",
+    "priority": "high",
+    "artifacts": [
+      "backend/src/modules/courses/courses.service.ts",
+      "backend/src/modules/quizzes/quizzes.controller.ts",
+      "backend/src/modules/quizzes/quizzes.service.ts",
+      "backend/prisma/migrations/quiz_enforce_lesson_section_hierarchy.sql",
+      "frontend/app/admin/courses/create/page.tsx",
+      "frontend/app/instructor/courses/[id]/page.tsx",
+      "frontend/app/instructor/courses/create/page.tsx",
+      "frontend/app/instructor/quizzes/page.tsx"
+    ],
+    "next": "Run focused runtime QA for lesson-level quiz create/clone and course clone modes; if DB migration is already applied cleanly, this plan can move from review to done.",
+    "updatedAt": "2026-03-28T12:45:00+07:00"
+  },
+  {
+    "taskId": "tinylms-20260328-quiz-course-refactor-qa",
+    "title": "QA closeout for quiz-course-refactor runtime flows",
+    "plan": "20260228-quiz-course-refactor",
+    "owner": "Huy_Tester",
+    "state": "todo",
+    "round": "qa",
+    "priority": "high",
+    "artifacts": [
+      "frontend/app/instructor/courses/[id]/page.tsx",
+      "frontend/app/instructor/courses/create/page.tsx",
+      "frontend/app/admin/courses/create/page.tsx",
+      "backend/src/modules/quizzes/quizzes.service.ts",
+      "backend/src/modules/quizzes/quizzes.controller.ts",
+      "backend/src/modules/courses/courses.service.ts",
+      "backend/prisma/migrations/quiz_enforce_lesson_section_hierarchy.sql"
+    ],
+    "next": "Execute runtime QA: (1) create quiz from lesson in instructor editor, (2) clone quiz to a quiz-free lesson, (3) verify course clone mode none, (4) verify course clone mode clone_all, (5) confirm import_from_quizzes messaging/behavior does not silently noop, (6) confirm DB migration assumptions in the active environment.",
+    "updatedAt": "2026-03-28T13:36:00+07:00"
+  },
+  {
+    "taskId": "tinylms-20260327-course-management-ui",
+    "title": "Close remaining UI polish items for instructor courses page",
+    "plan": "20260228-course-management-ui",
+    "owner": "Y_Frontend",
+    "state": "review",
+    "round": "review",
+    "priority": "medium",
+    "artifacts": [
+      "frontend/app/instructor/courses/page.tsx"
+    ],
+    "next": "Verify which remaining UI plan items are true gaps versus outdated checklist items",
+    "updatedAt": "2026-03-27T12:49:00+07:00"
+  },
+  {
+    "taskId": "tinylms-20260327-course-management-infra",
+    "title": "Close remaining infrastructure/reporting gaps for instructor courses page",
+    "plan": "20260228-course-management-infra",
+    "owner": "Minh_Review",
+    "state": "review",
+    "round": "review",
+    "priority": "medium",
+    "artifacts": [
+      "frontend/app/instructor/courses/page.tsx",
+      "frontend/lib/query-keys.ts"
+    ],
+    "next": "Cross-check URL-filter/query-key behavior against the original infra plan",
+    "updatedAt": "2026-03-27T12:49:00+07:00"
+  },
+  {
+    "taskId": "tinylms-20260328-instructor-management",
+    "title": "Reconcile instructor management plan against current implementation reality",
+    "plan": "20260227-instructor-management",
+    "owner": "Minh_Review",
+    "state": "review",
+    "round": "review",
+    "priority": "medium",
+    "artifacts": [
+      "frontend/app/instructor/courses/page.tsx",
+      "frontend/app/instructor/courses/create/page.tsx",
+      "frontend/app/instructor/courses/[id]/page.tsx",
+      "frontend/app/instructor/quizzes/page.tsx",
+      "frontend/app/instructor/question-banks"
+    ],
+    "next": "Reconcile stale checklist items in the instructor-management plan and separate true gaps from already-implemented functionality.",
+    "updatedAt": "2026-03-28T16:53:00+07:00"
+  },
+  {
+    "taskId": "tinylms-20260328-course-outline-dnd",
+    "title": "QA closeout for course outline drag-and-drop flows",
+    "plan": "20260303-course-outline-dnd",
+    "owner": "Huy_Tester",
+    "state": "dispatched",
+    "round": "qa",
+    "priority": "high",
+    "artifacts": [
+      "frontend/app/instructor/courses/[id]/outline/page.tsx",
+      "frontend/app/instructor/courses/[id]/page.tsx",
+      "frontend/lib/api.ts"
+    ],
+    "next": "Verify section reorder, lesson reorder within/across sections, optimistic UI behavior, and API success/failure handling for outline drag-and-drop.",
+    "updatedAt": "2026-03-29T10:12:48+07:00"
+  }
+]

@@ -1,0 +1,140 @@
+import { PrismaService } from '../../common/prisma.service';
+import { CoursesService } from '../courses/courses.service';
+import { CreateLessonDto, UpdateLessonDto } from './dto/lesson.dto';
+export declare class LessonsService {
+    private prisma;
+    private coursesService;
+    constructor(prisma: PrismaService, coursesService: CoursesService);
+    private syncCourseLessonCount;
+    findBySection(sectionId: string): Promise<{
+        id: string;
+        title: string;
+        createdAt: Date;
+        updatedAt: Date;
+        type: string;
+        orderIndex: number;
+        courseId: string;
+        sectionId: string;
+        content: string | null;
+        videoUrl: string | null;
+        videoProvider: string | null;
+        pdfUrl: string | null;
+        durationMins: number | null;
+        isPreview: boolean;
+        isPublished: boolean;
+        prerequisiteLessonId: string | null;
+        availableAfterDays: number | null;
+        availableFrom: Date | null;
+    }[]>;
+    findOne(id: string): Promise<{
+        section: {
+            id: string;
+            title: string;
+            courseId: string;
+        };
+    } & {
+        id: string;
+        title: string;
+        createdAt: Date;
+        updatedAt: Date;
+        type: string;
+        orderIndex: number;
+        courseId: string;
+        sectionId: string;
+        content: string | null;
+        videoUrl: string | null;
+        videoProvider: string | null;
+        pdfUrl: string | null;
+        durationMins: number | null;
+        isPreview: boolean;
+        isPublished: boolean;
+        prerequisiteLessonId: string | null;
+        availableAfterDays: number | null;
+        availableFrom: Date | null;
+    }>;
+    findOneForLearning(id: string, userId: string): Promise<{
+        userProgress: {
+            id: string;
+            updatedAt: Date;
+            courseId: string;
+            userId: string;
+            lessonId: string;
+            completedAt: Date | null;
+            isCompleted: boolean;
+            lastPosition: number;
+        } | null;
+        section: {
+            id: string;
+            title: string;
+            courseId: string;
+        };
+        id: string;
+        title: string;
+        createdAt: Date;
+        updatedAt: Date;
+        type: string;
+        orderIndex: number;
+        courseId: string;
+        sectionId: string;
+        content: string | null;
+        videoUrl: string | null;
+        videoProvider: string | null;
+        pdfUrl: string | null;
+        durationMins: number | null;
+        isPreview: boolean;
+        isPublished: boolean;
+        prerequisiteLessonId: string | null;
+        availableAfterDays: number | null;
+        availableFrom: Date | null;
+    }>;
+    create(sectionId: string, dto: CreateLessonDto, userId: string, userRole?: string): Promise<{
+        id: string;
+        title: string;
+        createdAt: Date;
+        updatedAt: Date;
+        type: string;
+        orderIndex: number;
+        courseId: string;
+        sectionId: string;
+        content: string | null;
+        videoUrl: string | null;
+        videoProvider: string | null;
+        pdfUrl: string | null;
+        durationMins: number | null;
+        isPreview: boolean;
+        isPublished: boolean;
+        prerequisiteLessonId: string | null;
+        availableAfterDays: number | null;
+        availableFrom: Date | null;
+    }>;
+    update(id: string, dto: UpdateLessonDto, userId: string, userRole?: string): Promise<{
+        id: string;
+        title: string;
+        createdAt: Date;
+        updatedAt: Date;
+        type: string;
+        orderIndex: number;
+        courseId: string;
+        sectionId: string;
+        content: string | null;
+        videoUrl: string | null;
+        videoProvider: string | null;
+        pdfUrl: string | null;
+        durationMins: number | null;
+        isPreview: boolean;
+        isPublished: boolean;
+        prerequisiteLessonId: string | null;
+        availableAfterDays: number | null;
+        availableFrom: Date | null;
+    }>;
+    delete(id: string, userId: string, userRole?: string): Promise<{
+        success: boolean;
+    }>;
+    reorder(sectionId: string, lessonIds: string[], userId: string, userRole?: string): Promise<{
+        success: boolean;
+    }>;
+    private canAccessLesson;
+    private verifyCourseAccess;
+    checkPrerequisite(lessonId: string, userId: string): Promise<boolean>;
+    private isLessonAvailable;
+}

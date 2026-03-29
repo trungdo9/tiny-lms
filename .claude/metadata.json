@@ -1,0 +1,9 @@
+{
+  "version": "1.0.1",
+  "name": "@trungdo9/ClauKit",
+  "description": "A CLI tool to initialize Claude agents configuration in your project.",
+  "buildDate": "2026-02-24T09:38:42.201Z",
+  "setupDate": "2026-02-24T09:38:42.201Z",
+  "templateVersion": "1.0.1",
+  "installedFrom": "https://github.com/trungdo9/ClauKit.git"
+}

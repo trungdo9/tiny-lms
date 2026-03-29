@@ -1,0 +1,30 @@
+# Robots.txt for Tiny LMS
+# Controls search engine crawler behavior
+
+# Allow all crawlers by default
+User-agent: *
+Allow: /
+
+# Disallow admin and internal routes
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /instructor
+Disallow: /settings
+Disallow: /api/
+Disallow: /auth/
+
+# Disallow sensitive user routes
+Disallow: /profile
+Disallow: /history
+Disallow: /certificates
+Disallow: /payment
+
+# Specific rules for GoogleBot (more permissive)
+User-agent: Googlebot
+Allow: /
+
+# Sitemap location
+Sitemap: https://tinylms.com/sitemap.xml
+
+# Crawl-delay (in seconds) to prevent server overload
+Crawl-delay: 1

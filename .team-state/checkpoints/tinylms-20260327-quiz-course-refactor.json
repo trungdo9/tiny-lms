@@ -1,0 +1,32 @@
+{
+  "taskId": "tinylms-20260327-quiz-course-refactor",
+  "plan": "20260228-quiz-course-refactor",
+  "project": "tiny-lms",
+  "currentOwner": "Linh_Orchestrator",
+  "currentRound": "review",
+  "state": "review",
+  "reviewStatus": "pending",
+  "lastArtifact": [
+    "frontend/app/instructor/courses/[id]/page.tsx",
+    "plans/_audits/plan-status-audit-20260327.md",
+    ".team-state/tasks.json",
+    ".team-state/rounds.json",
+    ".team-state/events.log"
+  ],
+  "lastCommit": "10303f0",
+  "lastSessionKey": "agent:main:telegram:direct:1301434783",
+  "lastRuntime": "direct",
+  "knownBlockers": [
+    "Runtime QA closeout has not yet been independently completed by Huy_Tester",
+    "DB migration confirmation depends on the active environment"
+  ],
+  "nextAction": "Run the independent QA closeout task tinylms-20260328-quiz-course-refactor-qa and record pass/fail evidence.",
+  "recoveryInstructions": [
+    "Read tasks.json for canonical task state",
+    "Read rounds.json for current lane/round",
+    "Read recent events.log lines for last handoff/blocker",
+    "Read the QA handoff file in .team-state/handoffs/",
+    "Rebind session only after reconstructing state from files"
+  ],
+  "updatedAt": "2026-03-28T16:46:00+07:00"
+}

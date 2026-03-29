@@ -1,0 +1,363 @@
+[
+  {
+    "serverName": "happy",
+    "name": "list_computers",
+    "description": "List available computers filtered by HAPPY_MCP_COMPUTERS.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "list_sessions",
+    "description": "List all active Happy Coder sessions.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "active",
+                "idle",
+                "waiting_permission"
+              ],
+              "description": "Filter by session status"
+            },
+            "computer": {
+              "type": "string",
+              "description": "Filter by computer hostname"
+            },
+            "projectPath": {
+              "type": "string",
+              "description": "Filter by project path prefix"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "get_session",
+    "description": "Get detailed state of a specific session.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "The session ID to get details for"
+        },
+        "includeMessages": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to include messages"
+        },
+        "lastN": {
+          "type": "number",
+          "default": 20,
+          "description": "Number of recent messages to include"
+        },
+        "after": {
+          "type": "string",
+          "description": "ISO 8601 timestamp — only return messages after this time"
+        }
+      },
+      "required": [
+        "sessionId"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "watch_session",
+    "description": "Watch sessions for real-time updates.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sessionIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "One or more session IDs to watch"
+        },
+        "timeoutSeconds": {
+          "type": "number",
+          "default": 300,
+          "description": "Max wait time in seconds (default 300)"
+        }
+      },
+      "required": [
+        "sessionIds"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "send_message",
+    "description": "Send a message to a session.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "The session ID to send the message to"
+        },
+        "message": {
+          "type": "string",
+          "description": "The message text to send"
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "permissionMode": {
+              "type": "string",
+              "enum": [
+                "default",
+                "acceptEdits",
+                "bypassPermissions",
+                "plan",
+                "read-only",
+                "safe-yolo",
+                "yolo"
+              ]
+            },
+            "allowedTools": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "disallowedTools": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "sessionId",
+        "message"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "approve_permission",
+    "description": "Approve a pending permission request.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "The session ID"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "The permission request ID to approve, or \"all_pending\" to approve all"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "acceptEdits",
+            "bypassPermissions",
+            "plan",
+            "read-only",
+            "safe-yolo",
+            "yolo"
+          ],
+          "description": "Permission mode to set after approval"
+        },
+        "allowTools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of tools to allow"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "approved_for_session"
+          ],
+          "default": "approved",
+          "description": "Approval decision type"
+        }
+      },
+      "required": [
+        "sessionId",
+        "requestId"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "deny_permission",
+    "description": "Deny a pending permission request.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "The session ID"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "The permission request ID to deny"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Feedback text explaining why the request was denied"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "denied",
+            "abort"
+          ],
+          "default": "denied",
+          "description": "Denial type: denied (reject this request) or abort (stop the session)"
+        }
+      },
+      "required": [
+        "sessionId",
+        "requestId"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "interrupt_session",
+    "description": "Interrupt a running session to stop its current activity.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "The session ID to interrupt"
+        }
+      },
+      "required": [
+        "sessionId"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "answer_question",
+    "description": "Answer a question from a session.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "The session ID"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "The question request ID from pending permissions"
+        },
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Map of question header to selected answer"
+        }
+      },
+      "required": [
+        "sessionId",
+        "requestId",
+        "answers"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "start_session",
+    "description": "Start a new Happy Coder session.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "computer": {
+          "type": "string",
+          "description": "The machine ID (from list_computers)"
+        },
+        "projectPath": {
+          "type": "string",
+          "description": "The working directory for the new session"
+        },
+        "initialMessage": {
+          "type": "string",
+          "description": "Initial message to send after session starts"
+        },
+        "permissionMode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "acceptEdits",
+            "bypassPermissions",
+            "plan",
+            "read-only",
+            "safe-yolo",
+            "yolo"
+          ],
+          "description": "Permission mode for the session"
+        },
+        "agent": {
+          "type": "string",
+          "enum": [
+            "claude",
+            "codex",
+            "gemini"
+          ],
+          "default": "claude",
+          "description": "The AI agent to use"
+        }
+      },
+      "required": [
+        "computer",
+        "projectPath"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "serverName": "happy",
+    "name": "authentication_status",
+    "description": "Check authentication status. If not authenticated, returns a QR code to scan with the Happy mobile app. Display the QR code to the user. Background polling will automatically detect when authentication completes.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  }
+]

@@ -1,0 +1,9 @@
+export { HeroSection } from './HeroSection';
+export { ValueProposition } from './ValueProposition';
+export { FeaturesSection } from './FeaturesSection';
+export { HowItWorksSection } from './HowItWorksSection';
+export { StatsSection } from './StatsSection';
+export { TestimonialsSection } from './TestimonialsSection';
+export { UseCasesSection } from './UseCasesSection';
+export { FAQSection } from './FAQSection';
+export { FeaturedCoursesSection } from './FeaturedCoursesSection';
