@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SepayWebhookDto = void 0;
 const class_validator_1 = require("class-validator");
+const swagger_1 = require("@nestjs/swagger");
 class SepayWebhookDto {
     id;
     gateway;
@@ -26,50 +27,61 @@ class SepayWebhookDto {
 }
 exports.SepayWebhookDto = SepayWebhookDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'TXN-001' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], SepayWebhookDto.prototype, "id", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'VCB' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], SepayWebhookDto.prototype, "gateway", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: '2025-01-15 10:30:00' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], SepayWebhookDto.prototype, "transactionDate", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: '0123456789' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], SepayWebhookDto.prototype, "accountNumber", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'PAY-abc123' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], SepayWebhookDto.prototype, "code", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'THANH TOAN KHOA HOC PAY-abc123' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], SepayWebhookDto.prototype, "content", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ enum: [1, 2], example: 1 }),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], SepayWebhookDto.prototype, "transferType", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 500000 }),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], SepayWebhookDto.prototype, "transferAmount", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 1500000 }),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], SepayWebhookDto.prototype, "accumulated", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'REF-xyz789' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], SepayWebhookDto.prototype, "referenceCode", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Payment for course enrollment' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], SepayWebhookDto.prototype, "description", void 0);

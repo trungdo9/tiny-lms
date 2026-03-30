@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateAttemptDto = exports.InitAttemptDto = void 0;
 const class_validator_1 = require("class-validator");
+const swagger_1 = require("@nestjs/swagger");
 class InitAttemptDto {
     packageId;
     lessonId;
@@ -18,15 +19,18 @@ class InitAttemptDto {
 }
 exports.InitAttemptDto = InitAttemptDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ format: 'uuid' }),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], InitAttemptDto.prototype, "packageId", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ format: 'uuid' }),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], InitAttemptDto.prototype, "lessonId", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ format: 'uuid' }),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -36,6 +40,7 @@ class UpdateAttemptDto {
 }
 exports.UpdateAttemptDto = UpdateAttemptDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: 'object', additionalProperties: { type: 'string' }, example: { 'cmi.score.raw': '85' } }),
     (0, class_validator_1.IsObject)(),
     __metadata("design:type", Object)
 ], UpdateAttemptDto.prototype, "values", void 0);

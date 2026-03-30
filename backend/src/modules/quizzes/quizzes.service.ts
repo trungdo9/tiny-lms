@@ -9,6 +9,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { CoursesService } from '../courses/courses.service';
 import { CreateQuizDto, UpdateQuizDto, AddQuizQuestionDto, CloneQuizDto } from './dto/quiz.dto';
 import { Prisma } from '@prisma/client';
+import { normalizeOptionalQuestionDifficulty } from '../questions/question-difficulty.util';
 
 @Injectable()
 export class QuizzesService {
@@ -282,7 +283,7 @@ export class QuizzesService {
               questionId: qq.questionId,
               bankId: qq.bankId,
               pickCount: qq.pickCount,
-              difficultyFilter: qq.difficultyFilter,
+              difficultyFilter: normalizeOptionalQuestionDifficulty(qq.difficultyFilter, 'difficultyFilter'),
               tagFilter: qq.tagFilter,
               orderIndex: qq.orderIndex,
               scoreOverride: qq.scoreOverride,
@@ -329,7 +330,7 @@ export class QuizzesService {
         questionId: dto.questionId,
         bankId: dto.bankId,
         pickCount: dto.pickCount,
-        difficultyFilter: dto.difficultyFilter,
+        difficultyFilter: normalizeOptionalQuestionDifficulty(dto.difficultyFilter, 'difficultyFilter'),
         tagFilter: dto.tagFilter,
         orderIndex,
         scoreOverride: dto.scoreOverride !== undefined ? new Prisma.Decimal(dto.scoreOverride) : undefined,

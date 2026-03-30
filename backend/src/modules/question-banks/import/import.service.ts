@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 import * as XLSX from 'xlsx';
+import { normalizeQuestionDifficulty } from '../../questions/question-difficulty.util';
 
 export interface ImportQuestion {
   type: string;
@@ -198,7 +199,7 @@ export class ImportService {
       content,
       options,
       explanation: record.explanation?.trim() || undefined,
-      difficulty: record.difficulty?.toLowerCase().trim() || 'medium',
+      difficulty: normalizeQuestionDifficulty(record.difficulty, { defaultValue: 'medium' }),
       defaultScore: parseInt(record.score) || 1,
       tags,
     };

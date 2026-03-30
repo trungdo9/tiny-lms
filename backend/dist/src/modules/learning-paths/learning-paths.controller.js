@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LearningPathsController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const supabase_auth_guard_1 = require("../../common/guards/supabase-auth.guard");
 const learning_paths_service_1 = require("./learning-paths.service");
 const learning_path_dto_1 = require("./dto/learning-path.dto");
@@ -156,6 +157,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], LearningPathsController.prototype, "reorderCourses", null);
 exports.LearningPathsController = LearningPathsController = __decorate([
+    (0, swagger_1.ApiTags)('learning-paths'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('learning-paths'),
     __metadata("design:paramtypes", [learning_paths_service_1.LearningPathsService])
 ], LearningPathsController);

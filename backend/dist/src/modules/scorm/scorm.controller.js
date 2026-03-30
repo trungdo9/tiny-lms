@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const supabase_auth_guard_1 = require("../../common/guards/supabase-auth.guard");
+const swagger_1 = require("@nestjs/swagger");
 const scorm_service_1 = require("./scorm.service");
 const scorm_dto_1 = require("./dto/scorm.dto");
 let ScormController = class ScormController {
@@ -111,6 +112,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ScormController.prototype, "finishAttempt", null);
 exports.ScormController = ScormController = __decorate([
+    (0, swagger_1.ApiTags)('scorm'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('scorm'),
     (0, common_1.UseGuards)(supabase_auth_guard_1.SupabaseAuthGuard),
     __metadata("design:paramtypes", [scorm_service_1.ScormService])

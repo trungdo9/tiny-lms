@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../common/prisma.service");
 const courses_service_1 = require("../courses/courses.service");
 const client_1 = require("@prisma/client");
+const question_difficulty_util_1 = require("../questions/question-difficulty.util");
 let QuizzesService = class QuizzesService {
     prisma;
     coursesService;
@@ -251,7 +252,7 @@ let QuizzesService = class QuizzesService {
                             questionId: qq.questionId,
                             bankId: qq.bankId,
                             pickCount: qq.pickCount,
-                            difficultyFilter: qq.difficultyFilter,
+                            difficultyFilter: (0, question_difficulty_util_1.normalizeOptionalQuestionDifficulty)(qq.difficultyFilter, 'difficultyFilter'),
                             tagFilter: qq.tagFilter,
                             orderIndex: qq.orderIndex,
                             scoreOverride: qq.scoreOverride,
@@ -293,7 +294,7 @@ let QuizzesService = class QuizzesService {
                 questionId: dto.questionId,
                 bankId: dto.bankId,
                 pickCount: dto.pickCount,
-                difficultyFilter: dto.difficultyFilter,
+                difficultyFilter: (0, question_difficulty_util_1.normalizeOptionalQuestionDifficulty)(dto.difficultyFilter, 'difficultyFilter'),
                 tagFilter: dto.tagFilter,
                 orderIndex,
                 scoreOverride: dto.scoreOverride !== undefined ? new client_1.Prisma.Decimal(dto.scoreOverride) : undefined,

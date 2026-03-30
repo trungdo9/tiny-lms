@@ -10,6 +10,7 @@ exports.QuestionsModule = void 0;
 const common_1 = require("@nestjs/common");
 const questions_controller_1 = require("./questions.controller");
 const questions_service_1 = require("./questions.service");
+const questions_management_service_1 = require("./questions-management.service");
 const prisma_service_1 = require("../../common/prisma.service");
 let QuestionsModule = class QuestionsModule {
 };
@@ -17,8 +18,8 @@ exports.QuestionsModule = QuestionsModule;
 exports.QuestionsModule = QuestionsModule = __decorate([
     (0, common_1.Module)({
         controllers: [questions_controller_1.QuestionsController],
-        providers: [questions_service_1.QuestionsService, prisma_service_1.PrismaService],
-        exports: [questions_service_1.QuestionsService],
+        providers: [questions_service_1.QuestionsService, questions_management_service_1.QuestionsManagementService, prisma_service_1.PrismaService],
+        exports: [questions_service_1.QuestionsService, questions_management_service_1.QuestionsManagementService],
     })
 ], QuestionsModule);
 //# sourceMappingURL=questions.module.js.map

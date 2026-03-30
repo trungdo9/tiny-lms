@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateDepartmentDto = exports.CreateDepartmentDto = void 0;
 const class_validator_1 = require("class-validator");
+const swagger_1 = require("@nestjs/swagger");
 class CreateDepartmentDto {
     name;
     description;
@@ -20,28 +21,33 @@ class CreateDepartmentDto {
 }
 exports.CreateDepartmentDto = CreateDepartmentDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Engineering', minLength: 1, maxLength: 200 }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(1),
     (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], CreateDepartmentDto.prototype, "name", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Handles all engineering work.' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateDepartmentDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ format: 'uuid' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateDepartmentDto.prototype, "parentId", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'active' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateDepartmentDto.prototype, "status", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 1 }),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
@@ -55,6 +61,7 @@ class UpdateDepartmentDto {
 }
 exports.UpdateDepartmentDto = UpdateDepartmentDto;
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Engineering', minLength: 1, maxLength: 200 }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.MinLength)(1),
@@ -62,22 +69,26 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateDepartmentDto.prototype, "name", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Handles all engineering work.' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateDepartmentDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ format: 'uuid' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], UpdateDepartmentDto.prototype, "parentId", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'active' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateDepartmentDto.prototype, "status", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 1 }),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)

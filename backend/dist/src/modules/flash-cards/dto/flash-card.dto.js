@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CompleteSessionDto = exports.UpdateCardDto = exports.CreateCardDto = exports.UpdateDeckDto = exports.CreateDeckDto = void 0;
 const class_validator_1 = require("class-validator");
+const swagger_1 = require("@nestjs/swagger");
 class CreateDeckDto {
     title;
     description;
@@ -19,20 +20,24 @@ class CreateDeckDto {
 }
 exports.CreateDeckDto = CreateDeckDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Deck title' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateDeckDto.prototype, "title", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Deck description' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateDeckDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Whether cards should be presented in random order' }),
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], CreateDeckDto.prototype, "shuffleCards", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Whether the deck is published and visible to learners' }),
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
@@ -45,21 +50,25 @@ class UpdateDeckDto {
 }
 exports.UpdateDeckDto = UpdateDeckDto;
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Deck title' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateDeckDto.prototype, "title", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Deck description' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateDeckDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Whether cards should be presented in random order' }),
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateDeckDto.prototype, "shuffleCards", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Whether the deck is published and visible to learners' }),
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
@@ -73,24 +82,29 @@ class CreateCardDto {
 }
 exports.CreateCardDto = CreateCardDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Front face content of the flash card' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateCardDto.prototype, "front", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Back face content of the flash card' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateCardDto.prototype, "back", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Optional hint shown to the learner' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateCardDto.prototype, "hint", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'URL of an image associated with the card' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateCardDto.prototype, "imageUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Display order index within the deck' }),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
@@ -104,26 +118,31 @@ class UpdateCardDto {
 }
 exports.UpdateCardDto = UpdateCardDto;
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Front face content of the flash card' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateCardDto.prototype, "front", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Back face content of the flash card' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateCardDto.prototype, "back", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Optional hint shown to the learner' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateCardDto.prototype, "hint", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'URL of an image associated with the card' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateCardDto.prototype, "imageUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Display order index within the deck' }),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
@@ -134,10 +153,12 @@ class CompleteSessionDto {
 }
 exports.CompleteSessionDto = CompleteSessionDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Number of cards the learner marked as known' }),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], CompleteSessionDto.prototype, "knownCards", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Total time spent in the session, in seconds' }),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)

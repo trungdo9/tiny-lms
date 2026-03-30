@@ -2,6 +2,11 @@ import { Injectable, NotFoundException, BadRequestException, ForbiddenException 
 import { PrismaService } from '../../common/prisma.service';
 import { CreateQuestionDto, UpdateQuestionDto, ListQuestionsQueryDto } from './dto/question.dto';
 import { validateQuestionDto, checkBankOwnership } from './question-validation.helper';
+import {
+  normalizeOptionalQuestionDifficulty,
+  normalizeQuestionDifficulty,
+  normalizeQuestionDifficultyList,
+} from './question-difficulty.util';
 
 @Injectable()
 export class QuestionsService {
@@ -16,7 +21,7 @@ export class QuestionsService {
     const where: any = { bankId };
     if (search) where.content = { contains: search, mode: 'insensitive' };
     if (type) where.type = { in: type.split(',').map(t => t.trim()) };
-    if (difficulty) where.difficulty = { in: difficulty.split(',').map(d => d.trim()) };
+    if (difficulty) where.difficulty = { in: normalizeQuestionDifficultyList(difficulty) };
     if (tags) where.tags = { hasSome: tags.split(',').map(t => t.trim()) };
 
     const [total, data] = await this.prisma.$transaction([
@@ -67,7 +72,7 @@ export class QuestionsService {
         explanation: dto.explanation,
         mediaUrl: dto.mediaUrl,
         mediaType: dto.mediaType,
-        difficulty: dto.difficulty || 'medium',
+        difficulty: normalizeQuestionDifficulty(dto.difficulty, { defaultValue: 'medium' }),
         defaultScore: dto.defaultScore || 1,
         tags: dto.tags || [],
         options: dto.options ? {
@@ -98,7 +103,7 @@ export class QuestionsService {
             explanation: dto.explanation,
             mediaUrl: dto.mediaUrl,
             mediaType: dto.mediaType,
-            difficulty: dto.difficulty || 'medium',
+            difficulty: normalizeQuestionDifficulty(dto.difficulty, { defaultValue: 'medium' }),
             defaultScore: dto.defaultScore || 1,
             tags: dto.tags || [],
             options: dto.options ? {
@@ -153,7 +158,7 @@ export class QuestionsService {
           explanation: dto.explanation,
           mediaUrl: dto.mediaUrl,
           mediaType: dto.mediaType,
-          difficulty: dto.difficulty,
+          difficulty: normalizeOptionalQuestionDifficulty(dto.difficulty),
           defaultScore: dto.defaultScore,
           tags: dto.tags,
         },

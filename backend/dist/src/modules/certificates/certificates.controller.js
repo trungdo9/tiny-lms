@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CertificatesController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const supabase_auth_guard_1 = require("../../common/guards/supabase-auth.guard");
 const certificates_service_1 = require("./certificates.service");
 let CertificatesController = class CertificatesController {
@@ -98,6 +99,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CertificatesController.prototype, "getCertificatePdf", null);
 exports.CertificatesController = CertificatesController = __decorate([
+    (0, swagger_1.ApiTags)('certificates'),
     (0, common_1.Controller)('certificates'),
     __metadata("design:paramtypes", [certificates_service_1.CertificatesService])
 ], CertificatesController);

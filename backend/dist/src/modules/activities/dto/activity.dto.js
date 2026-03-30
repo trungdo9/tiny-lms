@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReorderActivitiesDto = exports.UpdateActivityDto = exports.CreateActivityDto = void 0;
 const class_validator_1 = require("class-validator");
+const swagger_1 = require("@nestjs/swagger");
 class CreateActivityDto {
     activityType;
     title;
@@ -20,24 +21,29 @@ class CreateActivityDto {
 }
 exports.CreateActivityDto = CreateActivityDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ enum: ['quiz', 'flashcard', 'video', 'file'], example: 'video' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateActivityDto.prototype, "activityType", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Intro Video' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateActivityDto.prototype, "title", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: false }),
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], CreateActivityDto.prototype, "isPublished", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'https://example.com/video.mp4' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateActivityDto.prototype, "contentUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'video/mp4' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -50,21 +56,25 @@ class UpdateActivityDto {
 }
 exports.UpdateActivityDto = UpdateActivityDto;
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Intro Video' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateActivityDto.prototype, "title", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: false }),
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateActivityDto.prototype, "isPublished", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'https://example.com/video.mp4' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateActivityDto.prototype, "contentUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'video/mp4' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -74,6 +84,7 @@ class ReorderActivitiesDto {
 }
 exports.ReorderActivitiesDto = ReorderActivitiesDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: [String], example: ['uuid-1', 'uuid-2'] }),
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], ReorderActivitiesDto.prototype, "activityIds", void 0);

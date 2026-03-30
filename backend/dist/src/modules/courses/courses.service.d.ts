@@ -13,8 +13,10 @@ export declare class CoursesService {
     canManageCourse(courseId: string, userId: string, userRole: string): Promise<boolean>;
     create(dto: CreateCourseDto, instructorId: string): Promise<{
         id: string;
-        title: string;
         slug: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -24,8 +26,6 @@ export declare class CoursesService {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
-        createdAt: Date;
-        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
     }>;
@@ -65,8 +65,8 @@ export declare class CoursesService {
             _count: undefined;
             category: {
                 id: string;
-                slug: string;
                 name: string;
+                slug: string;
             } | null;
             instructor: {
                 id: string;
@@ -74,8 +74,10 @@ export declare class CoursesService {
                 avatarUrl: string | null;
             };
             id: string;
-            title: string;
             slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            title: string;
             description: string | null;
             thumbnailUrl: string | null;
             level: string;
@@ -84,8 +86,6 @@ export declare class CoursesService {
             price: Prisma.Decimal | null;
             averageRating: number | null;
             totalReviews: number;
-            createdAt: Date;
-            updatedAt: Date;
             instructorId: string;
             categoryId: string | null;
         }[];
@@ -96,63 +96,7 @@ export declare class CoursesService {
             totalPages: number;
         };
     }>;
-    findOne(idOrSlug: string): Promise<({
-        category: {
-            id: string;
-            slug: string;
-            name: string;
-        } | null;
-        instructor: {
-            id: string;
-            fullName: string | null;
-            avatarUrl: string | null;
-        };
-        sections: ({
-            lessons: {
-                id: string;
-                title: string;
-                createdAt: Date;
-                updatedAt: Date;
-                type: string;
-                orderIndex: number;
-                courseId: string;
-                sectionId: string;
-                content: string | null;
-                videoUrl: string | null;
-                videoProvider: string | null;
-                pdfUrl: string | null;
-                durationMins: number | null;
-                isPreview: boolean;
-                isPublished: boolean;
-                prerequisiteLessonId: string | null;
-                availableAfterDays: number | null;
-                availableFrom: Date | null;
-            }[];
-        } & {
-            id: string;
-            title: string;
-            createdAt: Date;
-            orderIndex: number;
-            courseId: string;
-        })[];
-    } & {
-        id: string;
-        title: string;
-        slug: string;
-        description: string | null;
-        thumbnailUrl: string | null;
-        level: string;
-        status: string;
-        isFree: boolean;
-        price: Prisma.Decimal | null;
-        lessonCount: number;
-        averageRating: number | null;
-        totalReviews: number;
-        createdAt: Date;
-        updatedAt: Date;
-        instructorId: string;
-        categoryId: string | null;
-    }) | {
+    findOne(idOrSlug: string): Promise<{
         instructor: {
             id: any;
             full_name: any;
@@ -178,17 +122,51 @@ export declare class CoursesService {
         updated_at: any;
         instructor_id: any;
         category_id: any;
-    }>;
-    findMyCourses(userId: string): Promise<({
+    } | ({
+        category: {
+            id: string;
+            name: string;
+            slug: string;
+        } | null;
         instructor: {
             id: string;
             fullName: string | null;
             avatarUrl: string | null;
         };
+        sections: ({
+            lessons: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                title: string;
+                orderIndex: number;
+                courseId: string;
+                type: string;
+                content: string | null;
+                videoUrl: string | null;
+                videoProvider: string | null;
+                pdfUrl: string | null;
+                durationMins: number | null;
+                isPreview: boolean;
+                isPublished: boolean;
+                availableAfterDays: number | null;
+                availableFrom: Date | null;
+                sectionId: string;
+                prerequisiteLessonId: string | null;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            title: string;
+            orderIndex: number;
+            courseId: string;
+        })[];
     } & {
         id: string;
-        title: string;
         slug: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -198,8 +176,30 @@ export declare class CoursesService {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
+        instructorId: string;
+        categoryId: string | null;
+    })>;
+    findMyCourses(userId: string): Promise<({
+        instructor: {
+            id: string;
+            fullName: string | null;
+            avatarUrl: string | null;
+        };
+    } & {
+        id: string;
+        slug: string;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        description: string | null;
+        thumbnailUrl: string | null;
+        level: string;
+        status: string;
+        isFree: boolean;
+        price: Prisma.Decimal | null;
+        lessonCount: number;
+        averageRating: number | null;
+        totalReviews: number;
         instructorId: string;
         categoryId: string | null;
     })[]>;
@@ -212,12 +212,14 @@ export declare class CoursesService {
         _count: undefined;
         category: {
             id: string;
-            slug: string;
             name: string;
+            slug: string;
         } | null;
         id: string;
-        title: string;
         slug: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -227,15 +229,15 @@ export declare class CoursesService {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
-        createdAt: Date;
-        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
     }[]>;
     update(id: string, dto: UpdateCourseDto, userId: string, userRole?: string): Promise<{
         id: string;
-        title: string;
         slug: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -245,8 +247,6 @@ export declare class CoursesService {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
-        createdAt: Date;
-        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
     }>;
@@ -265,37 +265,37 @@ export declare class CoursesService {
         };
     }[]>;
     getCategoryById(id: string): Promise<{
-        _count: {
-            courses: number;
-        };
         parent: {
             id: string;
             name: string;
         } | null;
         children: {
             id: string;
-            slug: string;
             name: string;
+            slug: string;
         }[];
+        _count: {
+            courses: number;
+        };
     } & {
         id: string;
+        name: string;
         slug: string;
         createdAt: Date;
-        name: string;
         parentId: string | null;
     }>;
     createCategory(name: string, slug?: string, parentId?: string): Promise<{
         id: string;
+        name: string;
         slug: string;
         createdAt: Date;
-        name: string;
         parentId: string | null;
     }>;
     updateCategory(id: string, dto: UpdateCategoryDto): Promise<{
         id: string;
+        name: string;
         slug: string;
         createdAt: Date;
-        name: string;
         parentId: string | null;
     }>;
     deleteCategory(id: string): Promise<{
@@ -304,8 +304,10 @@ export declare class CoursesService {
     clone(courseId: string, userId: string, dto: CloneCourseDto, userRole?: string): Promise<{
         message: string;
         id: string;
-        title: string;
         slug: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -315,8 +317,6 @@ export declare class CoursesService {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
-        createdAt: Date;
-        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
     }>;

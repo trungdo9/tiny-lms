@@ -48,6 +48,7 @@ var ContactSyncWebhookController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContactSyncWebhookController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const crypto = __importStar(require("crypto"));
 const settings_service_1 = require("../settings/settings.service");
 const contact_sync_log_service_1 = require("./contact-sync-log.service");
@@ -155,6 +156,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ContactSyncWebhookController.prototype, "handleBrevo", null);
 exports.ContactSyncWebhookController = ContactSyncWebhookController = ContactSyncWebhookController_1 = __decorate([
+    (0, swagger_1.ApiTags)('contact-sync'),
     (0, common_1.Controller)('contact-sync/webhooks'),
     __metadata("design:paramtypes", [settings_service_1.SettingsService,
         contact_sync_log_service_1.ContactSyncLogService])

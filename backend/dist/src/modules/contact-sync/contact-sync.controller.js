@@ -15,6 +15,7 @@ var ContactSyncController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContactSyncController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const contact_sync_service_1 = require("./contact-sync.service");
 const contact_sync_log_service_1 = require("./contact-sync-log.service");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
@@ -106,6 +107,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ContactSyncController.prototype, "syncUser", null);
 exports.ContactSyncController = ContactSyncController = ContactSyncController_1 = __decorate([
+    (0, swagger_1.ApiTags)('contact-sync'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('contact-sync'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(role_enum_1.Role.ADMIN),

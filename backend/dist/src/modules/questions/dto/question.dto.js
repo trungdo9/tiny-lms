@@ -9,10 +9,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BulkCreateQuestionDto = exports.UpdateQuestionDto = exports.CreateQuestionDto = exports.CreateOptionDto = void 0;
+exports.MoveQuestionDto = exports.CloneQuestionDto = exports.ListQuestionsQueryDto = exports.BulkCreateQuestionDto = exports.UpdateQuestionDto = exports.CreateQuestionDto = exports.CreateOptionDto = exports.VALID_DIFFICULTIES = exports.VALID_QUESTION_TYPES = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
+const question_difficulty_util_1 = require("../question-difficulty.util");
+exports.VALID_QUESTION_TYPES = ['single', 'multi', 'true_false', 'short_answer', 'essay', 'matching', 'ordering', 'cloze'];
+exports.VALID_DIFFICULTIES = [...question_difficulty_util_1.CANONICAL_QUESTION_DIFFICULTIES];
 class CreateOptionDto {
     content;
     isCorrect;
@@ -56,8 +59,8 @@ class CreateQuestionDto {
 }
 exports.CreateQuestionDto = CreateQuestionDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Question type (e.g. single_choice, multiple_choice, fill_blank, match, order)' }),
-    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ enum: exports.VALID_QUESTION_TYPES, description: 'Question type' }),
+    (0, class_validator_1.IsIn)(exports.VALID_QUESTION_TYPES),
     __metadata("design:type", String)
 ], CreateQuestionDto.prototype, "type", void 0);
 __decorate([
@@ -84,8 +87,8 @@ __decorate([
     __metadata("design:type", String)
 ], CreateQuestionDto.prototype, "mediaType", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ description: 'Difficulty label (e.g. easy, medium, hard)' }),
-    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiPropertyOptional)({ enum: exports.VALID_DIFFICULTIES, default: 'medium', description: 'Difficulty level' }),
+    (0, class_validator_1.IsIn)(exports.VALID_DIFFICULTIES),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateQuestionDto.prototype, "difficulty", void 0);
@@ -119,6 +122,7 @@ class UpdateQuestionDto {
     difficulty;
     defaultScore;
     tags;
+    options;
 }
 exports.UpdateQuestionDto = UpdateQuestionDto;
 __decorate([
@@ -146,8 +150,8 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateQuestionDto.prototype, "mediaType", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ description: 'Difficulty label (e.g. easy, medium, hard)' }),
-    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiPropertyOptional)({ enum: exports.VALID_DIFFICULTIES, description: 'Difficulty level' }),
+    (0, class_validator_1.IsIn)(exports.VALID_DIFFICULTIES),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateQuestionDto.prototype, "difficulty", void 0);
@@ -165,6 +169,14 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateQuestionDto.prototype, "tags", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: () => CreateOptionDto, isArray: true, description: 'Replace all answer options inline (optional)' }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => CreateOptionDto),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateQuestionDto.prototype, "options", void 0);
 class BulkCreateQuestionDto {
     questions;
 }
@@ -176,4 +188,73 @@ __decorate([
     (0, class_transformer_1.Type)(() => CreateQuestionDto),
     __metadata("design:type", Array)
 ], BulkCreateQuestionDto.prototype, "questions", void 0);
+class ListQuestionsQueryDto {
+    search;
+    type;
+    difficulty;
+    tags;
+    page = 1;
+    limit = 20;
+}
+exports.ListQuestionsQueryDto = ListQuestionsQueryDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Full-text search on question content' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ListQuestionsQueryDto.prototype, "search", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Filter by types (comma-separated)', example: 'single,multi' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ListQuestionsQueryDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Filter by difficulties (comma-separated)', example: 'easy,medium' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ListQuestionsQueryDto.prototype, "difficulty", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Filter by tags (comma-separated, any match)', example: 'math,algebra' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ListQuestionsQueryDto.prototype, "tags", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ default: 1, minimum: 1, description: 'Page number' }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], ListQuestionsQueryDto.prototype, "page", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ default: 20, minimum: 1, maximum: 100, description: 'Items per page' }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(100),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], ListQuestionsQueryDto.prototype, "limit", void 0);
+class CloneQuestionDto {
+    targetBankId;
+}
+exports.CloneQuestionDto = CloneQuestionDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Target bank ID to clone into (defaults to same bank)' }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CloneQuestionDto.prototype, "targetBankId", void 0);
+class MoveQuestionDto {
+    targetBankId;
+}
+exports.MoveQuestionDto = MoveQuestionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Target bank ID to move question to' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], MoveQuestionDto.prototype, "targetBankId", void 0);
 //# sourceMappingURL=question.dto.js.map

@@ -1,3 +1,5 @@
+export declare const VALID_QUESTION_TYPES: string[];
+export declare const VALID_DIFFICULTIES: ("easy" | "medium" | "hard")[];
 export declare class CreateOptionDto {
     content: string;
     isCorrect?: boolean;
@@ -23,7 +25,22 @@ export declare class UpdateQuestionDto {
     difficulty?: string;
     defaultScore?: number;
     tags?: string[];
+    options?: CreateOptionDto[];
 }
 export declare class BulkCreateQuestionDto {
     questions: CreateQuestionDto[];
+}
+export declare class ListQuestionsQueryDto {
+    search?: string;
+    type?: string;
+    difficulty?: string;
+    tags?: string;
+    page?: number;
+    limit?: number;
+}
+export declare class CloneQuestionDto {
+    targetBankId?: string;
+}
+export declare class MoveQuestionDto {
+    targetBankId: string;
 }

@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrganizationController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const organization_service_1 = require("./organization.service");
 const update_organization_dto_1 = require("./dto/update-organization.dto");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
@@ -60,6 +61,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], OrganizationController.prototype, "seed", null);
 exports.OrganizationController = OrganizationController = __decorate([
+    (0, swagger_1.ApiTags)('organization'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('organization'),
     __metadata("design:paramtypes", [organization_service_1.OrganizationService])
 ], OrganizationController);

@@ -43,6 +43,7 @@ exports.ImportService = void 0;
 const common_1 = require("@nestjs/common");
 const sync_1 = require("csv-parse/sync");
 const XLSX = __importStar(require("xlsx"));
+const question_difficulty_util_1 = require("../../questions/question-difficulty.util");
 let ImportService = class ImportService {
     parseCSV(content) {
         try {
@@ -207,7 +208,7 @@ let ImportService = class ImportService {
             content,
             options,
             explanation: record.explanation?.trim() || undefined,
-            difficulty: record.difficulty?.toLowerCase().trim() || 'medium',
+            difficulty: (0, question_difficulty_util_1.normalizeQuestionDifficulty)(record.difficulty, { defaultValue: 'medium' }),
             defaultScore: parseInt(record.score) || 1,
             tags,
         };

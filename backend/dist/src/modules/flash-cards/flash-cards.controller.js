@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FlashCardsSessionController = exports.FlashCardsController = exports.LessonFlashCardsController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const supabase_auth_guard_1 = require("../../common/guards/supabase-auth.guard");
 const flash_cards_service_1 = require("./flash-cards.service");
 const flash_card_dto_1 = require("./dto/flash-card.dto");
@@ -37,6 +38,10 @@ let LessonFlashCardsController = class LessonFlashCardsController {
 };
 exports.LessonFlashCardsController = LessonFlashCardsController;
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Get flash card deck for a lesson' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Flash card deck' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Lesson not found' }),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Param)('lessonId')),
     __metadata("design:type", Function),
@@ -44,6 +49,11 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], LessonFlashCardsController.prototype, "findByLesson", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Create a flash card deck for a lesson' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Deck created' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Lesson not found' }),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('lessonId')),
@@ -53,6 +63,11 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], LessonFlashCardsController.prototype, "create", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Update the flash card deck for a lesson' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Deck updated' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Lesson not found' }),
     (0, common_1.Put)(),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('lessonId')),
@@ -62,6 +77,10 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], LessonFlashCardsController.prototype, "update", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Delete the flash card deck for a lesson' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Deck deleted' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Lesson not found' }),
     (0, common_1.Delete)(),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('lessonId')),
@@ -70,6 +89,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], LessonFlashCardsController.prototype, "delete", null);
 exports.LessonFlashCardsController = LessonFlashCardsController = __decorate([
+    (0, swagger_1.ApiTags)('flash-cards'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('lessons/:lessonId/flash-cards'),
     (0, common_1.UseGuards)(supabase_auth_guard_1.SupabaseAuthGuard),
     __metadata("design:paramtypes", [flash_cards_service_1.FlashCardsService])
@@ -106,6 +127,9 @@ let FlashCardsController = class FlashCardsController {
 };
 exports.FlashCardsController = FlashCardsController;
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'List all flash card decks for the current instructor' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of decks' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -113,6 +137,10 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FlashCardsController.prototype, "findAll", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Get all cards in a deck' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of cards' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Deck not found' }),
     (0, common_1.Get)(':deckId/cards'),
     __param(0, (0, common_1.Param)('deckId')),
     __metadata("design:type", Function),
@@ -120,6 +148,11 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FlashCardsController.prototype, "getCards", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Add a card to a deck' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Card added' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Deck not found' }),
     (0, common_1.Post)(':deckId/cards'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('deckId')),
@@ -129,6 +162,11 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FlashCardsController.prototype, "addCard", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Update a flash card' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Card updated' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Card not found' }),
     (0, common_1.Put)('cards/:cardId'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('cardId')),
@@ -138,6 +176,10 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FlashCardsController.prototype, "updateCard", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Delete a flash card' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Card deleted' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Card not found' }),
     (0, common_1.Delete)('cards/:cardId'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('cardId')),
@@ -146,6 +188,11 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FlashCardsController.prototype, "deleteCard", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Reorder cards within a deck' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Cards reordered' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Deck not found' }),
     (0, common_1.Put)(':deckId/cards/reorder'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('deckId')),
@@ -155,6 +202,10 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FlashCardsController.prototype, "reorderCards", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Start a flash card study session' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Session started' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Deck not found' }),
     (0, common_1.Post)(':deckId/start'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('deckId')),
@@ -163,6 +214,10 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FlashCardsController.prototype, "startSession", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Get study history for a deck' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Study history' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Deck not found' }),
     (0, common_1.Get)(':deckId/history'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('deckId')),
@@ -171,6 +226,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FlashCardsController.prototype, "getHistory", null);
 exports.FlashCardsController = FlashCardsController = __decorate([
+    (0, swagger_1.ApiTags)('flash-cards'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('flash-cards-deck'),
     (0, common_1.UseGuards)(supabase_auth_guard_1.SupabaseAuthGuard),
     __metadata("design:paramtypes", [flash_cards_service_1.FlashCardsService])
@@ -186,6 +243,11 @@ let FlashCardsSessionController = class FlashCardsSessionController {
 };
 exports.FlashCardsSessionController = FlashCardsSessionController;
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Complete a flash card study session' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Session completed' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Session not found' }),
     (0, common_1.Post)(':sessionId/complete'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('sessionId')),
@@ -195,6 +257,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FlashCardsSessionController.prototype, "complete", null);
 exports.FlashCardsSessionController = FlashCardsSessionController = __decorate([
+    (0, swagger_1.ApiTags)('flash-cards'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('flash-cards-sessions'),
     (0, common_1.UseGuards)(supabase_auth_guard_1.SupabaseAuthGuard),
     __metadata("design:paramtypes", [flash_cards_service_1.FlashCardsService])

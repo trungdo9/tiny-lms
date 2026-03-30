@@ -440,8 +440,6 @@ let CoursesService = class CoursesService {
             throw new common_1.ForbiddenException('You can only clone courses you are assigned to');
         }
         const source = await this.findOne(courseId);
-        if (!source)
-            throw new common_1.NotFoundException('Course not found');
         const newSlug = this.generateSlug(dto.title);
         return this.prisma.$transaction(async (tx) => {
             const newCourse = await tx.course.create({

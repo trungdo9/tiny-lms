@@ -25,29 +25,19 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   projects: [
-    // Setup project - authenticate before running tests
-    {
-      name: 'setup',
-      testMatch: /.*\.setup\.ts/,
-    },
     // Chromium for all tests
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Reuse authenticated state from setup
-        storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup'],
     },
     // Mobile Safari for responsive tests
     {
       name: 'Mobile Safari',
       use: {
         ...devices['iPhone 13'],
-        storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup'],
     },
   ],
   webServer: process.env.CI

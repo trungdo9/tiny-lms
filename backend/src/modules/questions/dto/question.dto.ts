@@ -2,8 +2,10 @@ import { IsString, IsOptional, IsArray, IsBoolean, IsNumber, IsUUID, ValidateNes
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+import { CANONICAL_QUESTION_DIFFICULTIES } from '../question-difficulty.util';
+
 export const VALID_QUESTION_TYPES = ['single', 'multi', 'true_false', 'short_answer', 'essay', 'matching', 'ordering', 'cloze'];
-export const VALID_DIFFICULTIES = ['easy', 'medium', 'hard'];
+export const VALID_DIFFICULTIES = [...CANONICAL_QUESTION_DIFFICULTIES];
 
 export class CreateOptionDto {
   @ApiProperty({ description: 'Option text content' })

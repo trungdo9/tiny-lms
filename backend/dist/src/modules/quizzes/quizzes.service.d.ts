@@ -21,15 +21,14 @@ export declare class QuizzesService {
         };
     } & {
         id: string;
-        title: string;
-        description: string | null;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        description: string | null;
         courseId: string;
-        sectionId: string;
         isPublished: boolean;
         availableFrom: Date | null;
-        activityId: string;
+        sectionId: string;
         timeLimitMinutes: number | null;
         maxAttempts: number | null;
         passScore: Prisma.Decimal | null;
@@ -43,6 +42,7 @@ export declare class QuizzesService {
         allowBackNavigation: boolean;
         availableUntil: Date | null;
         showLeaderboard: boolean;
+        activityId: string;
     }>;
     findAll(courseId?: string, sectionId?: string): Promise<({
         course: {
@@ -59,15 +59,14 @@ export declare class QuizzesService {
         };
     } & {
         id: string;
-        title: string;
-        description: string | null;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        description: string | null;
         courseId: string;
-        sectionId: string;
         isPublished: boolean;
         availableFrom: Date | null;
-        activityId: string;
+        sectionId: string;
         timeLimitMinutes: number | null;
         maxAttempts: number | null;
         passScore: Prisma.Decimal | null;
@@ -81,6 +80,7 @@ export declare class QuizzesService {
         allowBackNavigation: boolean;
         availableUntil: Date | null;
         showLeaderboard: boolean;
+        activityId: string;
     })[]>;
     findByLesson(lessonId: string, userId?: string, userRole?: string): Promise<({
         course: {
@@ -91,20 +91,21 @@ export declare class QuizzesService {
             id: string;
             title: string;
         };
-        _count: {
-            attempts: number;
-        };
         questions: ({
+            bank: {
+                id: string;
+                title: string;
+            } | null;
             question: ({
                 options: {
                     id: string;
                     createdAt: Date;
                     orderIndex: number | null;
                     content: string;
-                    questionId: string;
                     isCorrect: boolean;
                     matchKey: string | null;
                     matchValue: string | null;
+                    questionId: string;
                 }[];
             } & {
                 id: string;
@@ -112,40 +113,38 @@ export declare class QuizzesService {
                 updatedAt: Date;
                 type: string;
                 content: string;
-                bankId: string;
                 explanation: string | null;
                 mediaUrl: string | null;
                 mediaType: string | null;
                 difficulty: string;
                 defaultScore: Prisma.Decimal;
                 tags: string[];
+                bankId: string;
             }) | null;
-            bank: {
-                id: string;
-                title: string;
-            } | null;
         } & {
             id: string;
             orderIndex: number;
-            quizId: string;
-            questionId: string | null;
             bankId: string | null;
             pickCount: number | null;
             difficultyFilter: string | null;
             tagFilter: string[];
             scoreOverride: Prisma.Decimal | null;
+            quizId: string;
+            questionId: string | null;
         })[];
+        _count: {
+            attempts: number;
+        };
     } & {
         id: string;
-        title: string;
-        description: string | null;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        description: string | null;
         courseId: string;
-        sectionId: string;
         isPublished: boolean;
         availableFrom: Date | null;
-        activityId: string;
+        sectionId: string;
         timeLimitMinutes: number | null;
         maxAttempts: number | null;
         passScore: Prisma.Decimal | null;
@@ -159,6 +158,7 @@ export declare class QuizzesService {
         allowBackNavigation: boolean;
         availableUntil: Date | null;
         showLeaderboard: boolean;
+        activityId: string;
     }) | null>;
     findById(id: string): Promise<{
         course: {
@@ -169,20 +169,21 @@ export declare class QuizzesService {
             id: string;
             title: string;
         };
-        _count: {
-            attempts: number;
-        };
         questions: ({
+            bank: {
+                id: string;
+                title: string;
+            } | null;
             question: ({
                 options: {
                     id: string;
                     createdAt: Date;
                     orderIndex: number | null;
                     content: string;
-                    questionId: string;
                     isCorrect: boolean;
                     matchKey: string | null;
                     matchValue: string | null;
+                    questionId: string;
                 }[];
             } & {
                 id: string;
@@ -190,40 +191,38 @@ export declare class QuizzesService {
                 updatedAt: Date;
                 type: string;
                 content: string;
-                bankId: string;
                 explanation: string | null;
                 mediaUrl: string | null;
                 mediaType: string | null;
                 difficulty: string;
                 defaultScore: Prisma.Decimal;
                 tags: string[];
+                bankId: string;
             }) | null;
-            bank: {
-                id: string;
-                title: string;
-            } | null;
         } & {
             id: string;
             orderIndex: number;
-            quizId: string;
-            questionId: string | null;
             bankId: string | null;
             pickCount: number | null;
             difficultyFilter: string | null;
             tagFilter: string[];
             scoreOverride: Prisma.Decimal | null;
+            quizId: string;
+            questionId: string | null;
         })[];
+        _count: {
+            attempts: number;
+        };
     } & {
         id: string;
-        title: string;
-        description: string | null;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        description: string | null;
         courseId: string;
-        sectionId: string;
         isPublished: boolean;
         availableFrom: Date | null;
-        activityId: string;
+        sectionId: string;
         timeLimitMinutes: number | null;
         maxAttempts: number | null;
         passScore: Prisma.Decimal | null;
@@ -237,6 +236,7 @@ export declare class QuizzesService {
         allowBackNavigation: boolean;
         availableUntil: Date | null;
         showLeaderboard: boolean;
+        activityId: string;
     }>;
     update(id: string, userId: string, dto: UpdateQuizDto, userRole?: string): Promise<{
         _count: {
@@ -244,15 +244,14 @@ export declare class QuizzesService {
         };
     } & {
         id: string;
-        title: string;
-        description: string | null;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        description: string | null;
         courseId: string;
-        sectionId: string;
         isPublished: boolean;
         availableFrom: Date | null;
-        activityId: string;
+        sectionId: string;
         timeLimitMinutes: number | null;
         maxAttempts: number | null;
         passScore: Prisma.Decimal | null;
@@ -266,6 +265,7 @@ export declare class QuizzesService {
         allowBackNavigation: boolean;
         availableUntil: Date | null;
         showLeaderboard: boolean;
+        activityId: string;
     }>;
     delete(id: string, userId: string, userRole?: string): Promise<{
         success: boolean;
@@ -284,15 +284,14 @@ export declare class QuizzesService {
         };
     } & {
         id: string;
-        title: string;
-        description: string | null;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        description: string | null;
         courseId: string;
-        sectionId: string;
         isPublished: boolean;
         availableFrom: Date | null;
-        activityId: string;
+        sectionId: string;
         timeLimitMinutes: number | null;
         maxAttempts: number | null;
         passScore: Prisma.Decimal | null;
@@ -306,42 +305,47 @@ export declare class QuizzesService {
         allowBackNavigation: boolean;
         availableUntil: Date | null;
         showLeaderboard: boolean;
+        activityId: string;
     }>;
     addQuestion(id: string, userId: string, dto: AddQuizQuestionDto, userRole?: string): Promise<{
+        bank: {
+            id: string;
+            title: string;
+        } | null;
         question: {
             id: string;
             type: string;
             content: string;
         } | null;
-        bank: {
-            id: string;
-            title: string;
-        } | null;
     } & {
         id: string;
         orderIndex: number;
-        quizId: string;
-        questionId: string | null;
         bankId: string | null;
         pickCount: number | null;
         difficultyFilter: string | null;
         tagFilter: string[];
         scoreOverride: Prisma.Decimal | null;
+        quizId: string;
+        questionId: string | null;
     }>;
     removeQuestion(quizId: string, quizQuestionId: string, userId: string, userRole?: string): Promise<{
         success: boolean;
     }>;
     getQuestions(quizId: string): Promise<({
+        bank: {
+            id: string;
+            title: string;
+        } | null;
         question: ({
             options: {
                 id: string;
                 createdAt: Date;
                 orderIndex: number | null;
                 content: string;
-                questionId: string;
                 isCorrect: boolean;
                 matchKey: string | null;
                 matchValue: string | null;
+                questionId: string;
             }[];
         } & {
             id: string;
@@ -349,28 +353,24 @@ export declare class QuizzesService {
             updatedAt: Date;
             type: string;
             content: string;
-            bankId: string;
             explanation: string | null;
             mediaUrl: string | null;
             mediaType: string | null;
             difficulty: string;
             defaultScore: Prisma.Decimal;
             tags: string[];
+            bankId: string;
         }) | null;
-        bank: {
-            id: string;
-            title: string;
-        } | null;
     } & {
         id: string;
         orderIndex: number;
-        quizId: string;
-        questionId: string | null;
         bankId: string | null;
         pickCount: number | null;
         difficultyFilter: string | null;
         tagFilter: string[];
         scoreOverride: Prisma.Decimal | null;
+        quizId: string;
+        questionId: string | null;
     })[]>;
     getLeaderboard(id: string, limit?: number): Promise<{
         rank: number;

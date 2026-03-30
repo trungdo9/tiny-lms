@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmailsController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const emails_service_1 = require("./emails.service");
 const email_templates_service_1 = require("./templates/email-templates.service");
 const email_logs_service_1 = require("./logs/email-logs.service");
@@ -245,6 +246,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EmailsController.prototype, "sendTestEmail", null);
 exports.EmailsController = EmailsController = __decorate([
+    (0, swagger_1.ApiTags)('emails'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('emails'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [emails_service_1.EmailsService,

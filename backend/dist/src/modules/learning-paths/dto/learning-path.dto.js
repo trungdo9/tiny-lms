@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReorderPathCoursesDto = exports.AddCourseToPathDto = exports.UpdateLearningPathDto = exports.CreateLearningPathDto = void 0;
 const class_validator_1 = require("class-validator");
+const swagger_1 = require("@nestjs/swagger");
 class CreateLearningPathDto {
     title;
     description;
@@ -18,15 +19,18 @@ class CreateLearningPathDto {
 }
 exports.CreateLearningPathDto = CreateLearningPathDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Frontend Developer Path' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateLearningPathDto.prototype, "title", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'A curated path to become a frontend developer.' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateLearningPathDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'https://example.com/thumbnail.png' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -39,21 +43,25 @@ class UpdateLearningPathDto {
 }
 exports.UpdateLearningPathDto = UpdateLearningPathDto;
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Frontend Developer Path' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateLearningPathDto.prototype, "title", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'A curated path to become a frontend developer.' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateLearningPathDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'https://example.com/thumbnail.png' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateLearningPathDto.prototype, "thumbnailUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: true }),
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
@@ -64,10 +72,12 @@ class AddCourseToPathDto {
 }
 exports.AddCourseToPathDto = AddCourseToPathDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ format: 'uuid' }),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], AddCourseToPathDto.prototype, "courseId", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: true }),
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
@@ -77,6 +87,7 @@ class ReorderPathCoursesDto {
 }
 exports.ReorderPathCoursesDto = ReorderPathCoursesDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: [String], example: ['uuid-1', 'uuid-2'] }),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)

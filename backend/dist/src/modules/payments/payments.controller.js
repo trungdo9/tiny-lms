@@ -18,6 +18,7 @@ const payments_service_1 = require("./payments.service");
 const create_payment_dto_1 = require("./dto/create-payment.dto");
 const webhook_dto_1 = require("./dto/webhook.dto");
 const supabase_auth_guard_1 = require("../../common/guards/supabase-auth.guard");
+const swagger_1 = require("@nestjs/swagger");
 let PaymentsController = class PaymentsController {
     paymentsService;
     constructor(paymentsService) {
@@ -73,6 +74,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PaymentsController.prototype, "getStatus", null);
 exports.PaymentsController = PaymentsController = __decorate([
+    (0, swagger_1.ApiTags)('payments'),
     (0, common_1.Controller)('payments'),
     __metadata("design:paramtypes", [payments_service_1.PaymentsService])
 ], PaymentsController);

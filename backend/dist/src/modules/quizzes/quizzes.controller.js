@@ -94,7 +94,9 @@ let QuizzesController = class QuizzesController {
         return this.service.removeQuestion(id, quizQuestionId, req.user.id, req.user.role);
     }
     getLeaderboard(id, limit) {
-        return this.service.getLeaderboard(id, limit ? parseInt(limit, 10) : 10);
+        const parsedLimit = limit ? parseInt(limit, 10) : 10;
+        const safeLimit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 100) : 10;
+        return this.service.getLeaderboard(id, safeLimit);
     }
 };
 exports.QuizzesController = QuizzesController;
