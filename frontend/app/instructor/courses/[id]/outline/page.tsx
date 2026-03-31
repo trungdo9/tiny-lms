@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRef } from 'react';
-import { sectionsApi, lessonsApi, scormApi, activitiesApi } from '@/lib/api';
+import { sectionsApi, lessonsApi, scormApi, activitiesApi, quizzesApi } from '@/lib/api';
 import { queryKeys } from '@/lib/query-keys';
 import { supabase } from '@/lib/supabase';
 import {
@@ -39,6 +39,7 @@ interface Quiz {
   title: string;
   isPublished: boolean;
   _count?: { questions: number };
+  course?: { id: string; title: string };
 }
 
 interface Activity {
@@ -185,10 +186,12 @@ function QuizPickerModal({
   onClose: () => void;
   onQuizAttached: (quiz: Quiz) => void;
 }) {
+  const queryClient = useQueryClient();
   const [mode, setMode] = useState<'create' | 'select'>('create');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [selectedQuizId, setSelectedQuizId] = useState('');
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState<QuizCreateForm>({
     title: `Quiz: ${lesson.title}`,
     timeLimitMinutes: 30,
@@ -198,78 +201,56 @@ function QuizPickerModal({
   });
 
   const { data: quizzes = [], isLoading: isLoadingQuizzes } = useQuery<Quiz[]>({
-    queryKey: ['quizzes', 'by-course', courseId],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${API}/quizzes`, {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      });
-      if (!res.ok) throw new Error('Không tải được danh sách quiz');
-      return res.json();
-    },
+    queryKey: queryKeys.quizzes.mine(),
+    queryFn: () => quizzesApi.listMine(),
     enabled: mode === 'select',
   });
 
-  const selectableQuizzes = quizzes.filter((quiz) => quiz.id !== lesson.quiz?.id);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setError('');
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${API}/lessons/${lesson.id}/quizzes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Không tạo được quiz');
-      }
-      onQuizAttached(await res.json());
+  const createMutation = useMutation<Quiz, Error, typeof form>({
+    mutationFn: (data) => quizzesApi.create(lesson.id, data) as Promise<Quiz>,
+    onSuccess: (quiz) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities.byLesson(lesson.id) });
+      onQuizAttached(quiz);
       onClose();
-    } catch (err: any) {
+    },
+    onError: (err: any) => {
       setError(err.message || 'Không tạo được quiz');
-    } finally {
-      setSaving(false);
-    }
+    },
+  });
+
+  const cloneMutation = useMutation<Quiz, Error, string>({
+    mutationFn: (quizId) => quizzesApi.clone(quizId, lesson.id) as Promise<Quiz>,
+    onSuccess: (quiz) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities.byLesson(lesson.id) });
+      onQuizAttached(quiz);
+      onClose();
+    },
+    onError: (err: any) => {
+      setError(err.message || 'Không gắn được quiz');
+    },
+  });
+
+  const filteredQuizzes = useMemo(() => {
+    if (!search.trim()) return quizzes.filter((q) => q.id !== lesson.quiz?.id);
+    const kw = search.toLowerCase();
+    return quizzes.filter(
+      (q) =>
+        q.id !== lesson.quiz?.id &&
+        (q.title.toLowerCase().includes(kw) || q.course?.title?.toLowerCase().includes(kw)),
+    );
+  }, [quizzes, search, lesson.quiz?.id]);
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    createMutation.mutate(form);
   };
 
-  const handleClone = async (e: React.FormEvent) => {
+  const handleClone = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedQuizId) return;
-    setSaving(true);
     setError('');
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${API}/quizzes/${selectedQuizId}/clone`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({ targetLessonId: lesson.id }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Không gắn được quiz');
-      }
-
-      const quizRes = await fetch(`${API}/lessons/${lesson.id}/quizzes`, {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      });
-      const attachedQuiz = quizRes.ok ? await quizRes.json() : null;
-      if (attachedQuiz) onQuizAttached(attachedQuiz);
-      onClose();
-    } catch (err: any) {
-      setError(err.message || 'Không gắn được quiz');
-    } finally {
-      setSaving(false);
-    }
+    cloneMutation.mutate(selectedQuizId);
   };
 
   return (
@@ -365,10 +346,10 @@ function QuizPickerModal({
               <div className="flex gap-2 pt-2">
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={createMutation.isPending}
                   className="flex-1 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
                 >
-                  {saving ? 'Đang tạo...' : 'Tạo quiz'}
+                  {createMutation.isPending ? 'Đang tạo...' : 'Tạo quiz'}
                 </button>
                 <button type="button" onClick={onClose} className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50">
                   Hủy
@@ -378,33 +359,62 @@ function QuizPickerModal({
           ) : (
             <form onSubmit={handleClone} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Quiz có sẵn</label>
-                <select
-                  value={selectedQuizId}
-                  onChange={(e) => setSelectedQuizId(e.target.value)}
+                <label className="mb-1 block text-sm font-medium text-gray-700">Tìm kiếm quiz</label>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Theo tên quiz hoặc khóa học..."
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-transparent focus:ring-2 focus:ring-teal-400"
-                  required
-                >
-                  <option value="">-- Chọn quiz --</option>
-                  {selectableQuizzes.map((quiz) => (
-                    <option key={quiz.id} value={quiz.id}>
-                      {quiz.title}
-                    </option>
-                  ))}
-                </select>
-                {isLoadingQuizzes && <p className="mt-2 text-xs text-gray-500">Đang tải danh sách quiz...</p>}
-                {!isLoadingQuizzes && selectableQuizzes.length === 0 && (
-                  <p className="mt-2 text-xs text-gray-500">Không có quiz phù hợp để gắn vào bài học này.</p>
+                />
+              </div>
+
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {isLoadingQuizzes && (
+                  <p className="text-center text-sm text-gray-500 py-4">Đang tải danh sách quiz...</p>
                 )}
+                {!isLoadingQuizzes && filteredQuizzes.length === 0 && (
+                  <p className="text-center text-sm text-gray-500 py-4">Không có quiz phù hợp.</p>
+                )}
+                {filteredQuizzes.map((quiz) => (
+                  <div
+                    key={quiz.id}
+                    onClick={() => setSelectedQuizId(quiz.id)}
+                    className={`p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                      selectedQuizId === quiz.id
+                        ? 'border-teal-500 bg-teal-50'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{quiz.title}</p>
+                        <p className="text-xs text-gray-500 truncate">{quiz.course?.title}</p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-2">
+                        <span className={`px-2 py-0.5 rounded text-xs ${
+                          quiz._count?.questions ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'
+                        }`}>
+                          {quiz._count?.questions || 0} câu
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-xs ${
+                          quiz.isPublished ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {quiz.isPublished ? 'Đã xuất bản' : 'Bản nháp'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
 
               <div className="flex gap-2 pt-2">
                 <button
                   type="submit"
-                  disabled={saving || !selectedQuizId}
+                  disabled={cloneMutation.isPending || !selectedQuizId}
                   className="flex-1 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
                 >
-                  {saving ? 'Đang gắn...' : 'Gắn quiz vào bài học'}
+                  {cloneMutation.isPending ? 'Đang gắn...' : 'Gắn quiz vào bài học'}
                 </button>
                 <button type="button" onClick={onClose} className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50">
                   Hủy

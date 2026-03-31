@@ -1,7 +1,7 @@
 # Plan: AI Question Generation with OpenAI API
 
 **Created:** 2026-03-21
-**Status:** Ready for implementation
+**Status:** ✅ Implemented (Phase 1 & 2)
 **Priority:** High
 
 ## Overview
@@ -17,9 +17,9 @@ Integrate OpenAI API (GPT-4o-mini) into the LMS to allow instructors to automati
 
 | # | Phase | Status | Description |
 |---|-------|--------|-------------|
-| 0 | [Refactor Shared Pages](phase-00-refactor-shared-pages.md) | 🔲 Pending | Extract 12 duplicated instructor/admin pages into shared components |
-| 1 | [Backend AI Module](phase-01-backend-ai-module.md) | 🔲 Pending | New `ai-questions` NestJS module with OpenAI SDK integration |
-| 2 | [Frontend AI Generate Modal](phase-02-frontend-ai-modal.md) | 🔲 Pending | "Generate with AI" button + modal on question bank page |
+| 0 | [Refactor Shared Pages](phase-00-refactor-shared-pages.md) | ✅ Complete | Extract 12 duplicated instructor/admin pages into shared components |
+| 1 | [Backend AI Module](phase-01-backend-ai-module.md) | ✅ Complete | New `ai-questions` NestJS module with OpenAI SDK integration |
+| 2 | [Frontend AI Generate Modal](phase-02-frontend-ai-modal.md) | ✅ Complete | "Generate with AI" button + modal on question bank page |
 
 ---
 

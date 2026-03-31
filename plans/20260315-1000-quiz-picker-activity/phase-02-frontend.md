@@ -84,7 +84,9 @@ Add to quizzesApi in api.ts: listMine(search?) calls GET /quizzes/mine with opti
 
 ### Step 2 -- Update query-keys.ts
 
-Replace unused quizzes.instructor with quizzes.mine() returning ["quizzes","mine"].
+Replace quizzes.instructor with quizzes.mine() returning ["quizzes","mine"].
+
+Note: The `quizzes.instructor` key WAS used by existing `/admin/quizzes` and `/instructor/quizzes` pages. These were updated to use `quizzes.list()` instead (they call the unscoped `/quizzes` endpoint, not `/quizzes/mine`).
 
 ### Step 3 -- Upgrade QuizPickerModal
 

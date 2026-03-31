@@ -48,6 +48,15 @@ export class LessonQuizzesController {
 export class QuizzesController {
   constructor(private service: QuizzesService) { }
 
+  /** List quizzes for the current instructor (scoped to their courses). */
+  @ApiOperation({ summary: 'List quizzes owned by the current instructor' })
+  @ApiResponse({ status: 200, description: 'List of quizzes' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Get('mine')
+  findMine(@Request() req: any, @Query('search') search?: string) {
+    return this.service.findMine(req.user.id, search);
+  }
+
   /** List quizzes, optionally filtered by courseId or sectionId. */
   @ApiOperation({ summary: 'List quizzes, optionally filtered by courseId or sectionId' })
   @ApiResponse({ status: 200, description: 'List of quizzes' })

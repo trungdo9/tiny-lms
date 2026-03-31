@@ -35,7 +35,7 @@ export default function QuizzesPage() {
   const [error, setError] = useState('');
 
   const { data: quizzes = [], isLoading } = useQuery<Quiz[]>({
-    queryKey: queryKeys.quizzes.instructor(),
+    queryKey: queryKeys.quizzes.list(),
     queryFn: fetchInstructorQuizzes,
   });
 
@@ -53,7 +53,7 @@ export default function QuizzesPage() {
       return id;
     },
     onSuccess: (deletedId) => {
-      queryClient.setQueryData<Quiz[]>(queryKeys.quizzes.instructor(), (old) =>
+      queryClient.setQueryData<Quiz[]>(queryKeys.quizzes.list(), (old) =>
         old ? old.filter(q => q.id !== deletedId) : []
       );
     },

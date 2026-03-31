@@ -5,15 +5,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
+import { CoursesService } from '../courses/courses.service';
 import { CreateActivityDto, UpdateActivityDto } from './dto/activity.dto';
 
 @Injectable()
 export class ActivitiesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private coursesService: CoursesService,
+  ) { }
 
   // ─── Create ────────────────────────────────────────────────────────────────
 
-  async create(userId: string, lessonId: string, dto: CreateActivityDto) {
+  async create(userId: string, lessonId: string, dto: CreateActivityDto, userRole: string = 'student') {
     // Verify lesson ownership
     const lesson = await this.prisma.lesson.findUnique({
       where: { id: lessonId },
@@ -21,8 +25,8 @@ export class ActivitiesService {
     });
 
     if (!lesson) throw new NotFoundException('Lesson not found');
-    if (lesson.course.instructorId !== userId) {
-      throw new ForbiddenException('You can only create activities for your own lessons');
+    if (!(await this.coursesService.canManageCourse(lesson.course.id, userId, userRole))) {
+      throw new ForbiddenException('You can only create activities for courses you are assigned to');
     }
 
     // Create activity
@@ -80,15 +84,15 @@ export class ActivitiesService {
 
   // ─── Update ────────────────────────────────────────────────────────────────
 
-  async update(userId: string, activityId: string, dto: UpdateActivityDto) {
+  async update(userId: string, activityId: string, dto: UpdateActivityDto, userRole: string = 'student') {
     const activity = await this.prisma.activity.findUnique({
       where: { id: activityId },
       include: { lesson: { include: { course: true } } },
     });
 
     if (!activity) throw new NotFoundException('Activity not found');
-    if (activity.lesson.course.instructorId !== userId) {
-      throw new ForbiddenException('You can only edit your own activities');
+    if (!(await this.coursesService.canManageCourse(activity.lesson.course.id, userId, userRole))) {
+      throw new ForbiddenException('You can only edit activities in courses you are assigned to');
     }
 
     return this.prisma.activity.update({
@@ -108,15 +112,15 @@ export class ActivitiesService {
 
   // ─── Delete ────────────────────────────────────────────────────────────────
 
-  async delete(userId: string, activityId: string) {
+  async delete(userId: string, activityId: string, userRole: string = 'student') {
     const activity = await this.prisma.activity.findUnique({
       where: { id: activityId },
       include: { lesson: { include: { course: true } } },
     });
 
     if (!activity) throw new NotFoundException('Activity not found');
-    if (activity.lesson.course.instructorId !== userId) {
-      throw new ForbiddenException('You can only delete your own activities');
+    if (!(await this.coursesService.canManageCourse(activity.lesson.course.id, userId, userRole))) {
+      throw new ForbiddenException('You can only delete activities in courses you are assigned to');
     }
 
     // Delete related content based on type
@@ -132,7 +136,7 @@ export class ActivitiesService {
 
   // ─── Reorder ─────────────────────────────────────────────────────────────
 
-  async reorder(userId: string, lessonId: string, activityIds: string[]) {
+  async reorder(userId: string, lessonId: string, activityIds: string[], userRole: string = 'student') {
     // Verify lesson ownership
     const lesson = await this.prisma.lesson.findUnique({
       where: { id: lessonId },
@@ -140,8 +144,8 @@ export class ActivitiesService {
     });
 
     if (!lesson) throw new NotFoundException('Lesson not found');
-    if (lesson.course.instructorId !== userId) {
-      throw new ForbiddenException('You can only reorder activities in your own lessons');
+    if (!(await this.coursesService.canManageCourse(lesson.course.id, userId, userRole))) {
+      throw new ForbiddenException('You can only reorder activities in courses you are assigned to');
     }
 
     // Update order for each activity

@@ -12,7 +12,7 @@
 | Date | 2026-03-21 |
 | Description | Extract duplicated instructor/admin page files into shared components accepting a `basePath` prop |
 | Priority | High (prerequisite for AI feature) |
-| Implementation Status | 🔲 Pending |
+| Implementation Status | ✅ Complete (QuestionBankDetailPage) |
 | Review Status | 🔲 Not reviewed |
 
 ---

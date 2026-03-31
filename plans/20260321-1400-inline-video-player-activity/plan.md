@@ -1,7 +1,7 @@
 # Plan: Inline Video Player for Video Activities
 
 **Date**: 2026-03-21
-**Status**: Ready for implementation
+**Status**: ✅ Complete
 **Scope**: Frontend only — no backend changes required
 
 ---

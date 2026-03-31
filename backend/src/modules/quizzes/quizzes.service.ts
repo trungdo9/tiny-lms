@@ -86,6 +86,22 @@ export class QuizzesService {
 
   // ─── Read ───────────────────────────────────────────────────────────────────
 
+  async findMine(userId: string, search?: string) {
+    const courseInstructors = await this.prisma.courseInstructor.findMany({
+      where: { profileId: userId },
+      select: { courseId: true },
+    });
+    const courseIds = courseInstructors.map(ci => ci.courseId);
+    const quizzes = await this.prisma.quiz.findMany({
+      where: { courseId: { in: courseIds } },
+      include: { course: { select: { id: true, title: true } }, _count: { select: { questions: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!search) return quizzes;
+    const kw = search.toLowerCase();
+    return quizzes.filter(q => q.title.toLowerCase().includes(kw) || q.course?.title?.toLowerCase().includes(kw));
+  }
+
   async findAll(courseId?: string, sectionId?: string) {
     const where: Record<string, unknown> = {};
     if (courseId) where.courseId = courseId;

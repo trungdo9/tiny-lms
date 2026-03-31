@@ -37,7 +37,7 @@ export const queryKeys = {
   quizzes: {
     list: (params?: object) => ['quizzes', 'list', params] as const,
     detail: (id: string) => ['quizzes', 'detail', id] as const,
-    instructor: () => ['quizzes', 'instructor'] as const,
+    mine: () => ['quizzes', 'mine'] as const,
   },
 
   // Attempts

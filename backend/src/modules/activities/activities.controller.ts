@@ -33,7 +33,7 @@ export class LessonActivitiesController {
     @Param('lessonId') lessonId: string,
     @Body() dto: CreateActivityDto,
   ) {
-    return this.service.create(req.user.id, lessonId, dto);
+    return this.service.create(req.user.id, lessonId, dto, req.user.role);
   }
 
   /** Reorder activities in a lesson. */
@@ -47,7 +47,7 @@ export class LessonActivitiesController {
     @Param('lessonId') lessonId: string,
     @Body() body: ReorderActivitiesDto,
   ) {
-    return this.service.reorder(req.user.id, lessonId, body.activityIds);
+    return this.service.reorder(req.user.id, lessonId, body.activityIds, req.user.role);
   }
 }
 
@@ -82,7 +82,7 @@ export class ActivitiesController {
     @Param('id') id: string,
     @Body() dto: UpdateActivityDto,
   ) {
-    return this.service.update(req.user.id, id, dto);
+    return this.service.update(req.user.id, id, dto, req.user.role);
   }
 
   /** Delete an activity. */
@@ -92,6 +92,6 @@ export class ActivitiesController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Activity not found' })
   delete(@Request() req: any, @Param('id') id: string) {
-    return this.service.delete(req.user.id, id);
+    return this.service.delete(req.user.id, id, req.user.role);
   }
 }

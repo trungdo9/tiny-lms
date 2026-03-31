@@ -114,7 +114,7 @@ export default function EditQuizPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.quizzes.detail(quizId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.quizzes.instructor() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.quizzes.list() });
     },
     onError: (err: Error) => {
       setError(err.message);

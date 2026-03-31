@@ -1,6 +1,6 @@
 # Quiz Picker in Course Activity Creation
 
-**Status:** Planned | **Date:** 2026-03-15
+**Status:** ✅ Complete | **Date:** 2026-03-15
 
 ---
 
@@ -35,8 +35,8 @@ Decision: Always clone via QuizzesService.clone(). Select existing = clone-into-
 
 | # | Phase | File | Status |
 |---|-------|------|--------|
-| 1 | Backend API | phase-01-backend.md | Pending |
-| 2 | Frontend UI | phase-02-frontend.md | Pending |
+| 1 | Backend API | phase-01-backend.md | ✅ Complete |
+| 2 | Frontend UI | phase-02-frontend.md | ✅ Complete |
 
 ---
 

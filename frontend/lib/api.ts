@@ -370,6 +370,11 @@ export const quizzesApi = {
     );
   },
 
+  listMine: async (search?: string) => {
+    const qs = search ? `?search=${encodeURIComponent(search)}` : '';
+    return fetchApi<any[]>(`/quizzes/mine${qs}`);
+  },
+
   get: (id: string) => fetchApi(`/quizzes/${id}`),
 
   create: (lessonId: string, data: {

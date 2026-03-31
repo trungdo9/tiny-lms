@@ -22,6 +22,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { activitiesApi } from '@/lib/api';
 import { queryKeys } from '@/lib/query-keys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getVideoEmbedUrl, isEmbedProvider } from '@/lib/video-utils';
 
 interface Activity {
   id: string;
@@ -81,6 +82,7 @@ export function ActivityList({
   const [showVideo, setShowVideo] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<{ url: string; type?: string } | null>(null);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [openVideoId, setOpenVideoId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -134,13 +136,15 @@ export function ActivityList({
         }
         break;
       case 'video':
+        // Toggle inline video player for students
+        setOpenVideoId((prev) => (prev === activity.id ? null : activity.id));
+        break;
       case 'file':
         if (activity.content_url) {
           if (onPlayVideo) {
             onPlayVideo(activity.content_url, activity.content_type);
           } else {
-            setCurrentVideo({ url: activity.content_url, type: activity.content_type });
-            setShowVideo(true);
+            window.open(activity.content_url, '_blank');
           }
         }
         break;
@@ -196,15 +200,23 @@ export function ActivityList({
           <SortableContext items={activities.map((a) => a.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {activities.map((activity) => (
-                <SortableActivityItem
-                  key={activity.id}
-                  activity={activity}
-                  isInstructor={isInstructor}
-                  onEdit={() => setEditingActivity(activity)}
-                  onDelete={() => handleDelete(activity.id)}
-                  onClick={() => handleActivityClick(activity)}
-                  isDeletePending={deleteMutation.isPending}
-                />
+                <div key={activity.id}>
+                  <SortableActivityItem
+                    activity={activity}
+                    isInstructor={isInstructor}
+                    onEdit={() => setEditingActivity(activity)}
+                    onDelete={() => handleDelete(activity.id)}
+                    onClick={() => handleActivityClick(activity)}
+                    isDeletePending={deleteMutation.isPending}
+                  />
+                  {/* Inline video player — student only, accordion */}
+                  {!isInstructor && activity.activity_type === 'video' && openVideoId === activity.id && (
+                    <ActivityVideoPlayer
+                      url={activity.content_url ?? ''}
+                      provider={activity.content_type ?? ''}
+                    />
+                  )}
+                </div>
               ))}
             </div>
           </SortableContext>
@@ -309,7 +321,9 @@ function SortableActivityItem({
           >
             {activity.activity_type === 'quiz' ? 'Start' :
              activity.activity_type === 'flashcard' ? 'Study' :
-             activity.activity_type === 'assignment' ? 'View' : 'View'}
+             activity.activity_type === 'video'
+               ? 'Watch'
+               : activity.activity_type === 'assignment' ? 'View' : 'View'}
           </button>
         )}
       </div>
@@ -580,6 +594,29 @@ function ActivityEditModal({ activity, lessonId, onClose }: { activity: Activity
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+// Inline Video Player for activity accordion
+function ActivityVideoPlayer({ url, provider }: { url: string; provider: string }) {
+  const embedUrl = getVideoEmbedUrl(url, provider);
+  if (!embedUrl) return null;
+
+  return (
+    <div className="border-[4px] border-black shadow-[8px_8px_0px_0px_#000] bg-black overflow-hidden mt-1">
+      <div className="aspect-video w-full">
+        {isEmbedProvider(provider) ? (
+          <iframe
+            src={embedUrl}
+            className="w-full h-full"
+            allowFullScreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          />
+        ) : (
+          <video src={embedUrl} controls className="w-full h-full" />
+        )}
       </div>
     </div>
   );
