@@ -4,97 +4,83 @@
 - **Date**: 2026-02-28
 - **Description**: Cập nhật frontend để hiển thị Activity
 - **Priority**: High
-- **Status**: ⬜ Pending
+- **Status**: ⚠️ PARTIAL - Updated 2026-03-31
 
 ## Context
-- Dependencies: Phase 2 - Backend API
+- Dependencies: Phase 2 - Backend API (✅ Complete)
 - Reference: Current lesson page, course editor
 
-## Key Insights
-- Lesson page: Hiển thị list of activities thay vì type-specific content
-- Course editor: Activity management (add, reorder, delete)
-- Student: Study activity based on type
+## What Was Implemented
+
+### Already Done
+1. ✅ `activitiesApi` in api.ts with CRUD operations
+2. ✅ Query keys in query-keys.ts
+3. ✅ `ActivityList` component with create form
+4. ✅ `VideoModal` component for inline video playback
+5. ✅ Integration with lesson-content.tsx
+
+### Fixed (2026-03-31)
+1. ✅ Flashcard routing: Now uses `onStartFlashCards` callback instead of redirecting to instructor page
+2. ✅ Video inline player: Added VideoModal for playing videos without new tab
+3. ✅ Quiz link: Fixed to use `activity.quiz.id` correctly
+
+## What Still Needs Work
+
+| Task | Priority | Status |
+|------|----------|--------|
+| Drag-drop reorder UI | Medium | ✅ Done (2026-03-31) |
+| Edit activity form | Medium | ✅ Done (2026-03-31) |
+| Activity type selector when creating | Low | ✅ Done (2026-03-31) |
+| Assignment activity type support | Low | ✅ Done (2026-03-31) |
 
 ## Architecture
 
-### Page Updates
-
-1. **Student Lesson Page** (`/courses/[slug]/learn/[lessonId]`)
-   - Fetch activities for lesson
-   - Render each activity based on type
-   - Activity types: quiz, flashcard, video, file
-
-2. **Instructor Course Editor** (`/instructor/courses/[id]`)
-   - Show activities list per lesson
-   - Add activity button (dropdown: quiz, flashcard, video, file)
-   - Drag to reorder
-
-### Components
+### Components Created
 
 ```
 frontend/components/
 └── activity/
-    ├── ActivityList.tsx      # List activities in lesson
-    ├── ActivityItem.tsx     # Single activity card
-    ├── ActivityEditor.tsx   # Create/edit activity
-    └── ActivityContent.tsx  # Type-specific content
+    ├── ActivityList.tsx      # ✅ Done - List activities with create form + video modal
+    ├── index.ts              # ✅ Exports
 ```
 
 ### API Updates
 
 ```typescript
-// frontend/lib/api/activities.ts
+// frontend/lib/api.ts - ✅ Already done
 export const activitiesApi = {
   getByLesson: (lessonId: string) =>
     fetchApi(`/lessons/${lessonId}/activities`),
-
   create: (lessonId: string, data: CreateActivityDto) =>
-    fetchApi(`/lessons/${lessonId}/activities`, { method: 'POST', body: JSON.stringify(data) }),
-
+    fetchApi(`/lessons/${lessonId}/activities`, { method: 'POST', ... }),
   update: (activityId: string, data: UpdateActivityDto) =>
-    fetchApi(`/lessons/*/activities/${activityId}`, { method: 'PUT', body: JSON.stringify(data) }),
-
+    fetchApi(`/activities/${activityId}`, { method: 'PUT', ... }),
   delete: (activityId: string) =>
-    fetchApi(`/lessons/*/activities/${activityId}`, { method: 'DELETE' }),
-
+    fetchApi(`/activities/${activityId}`, { method: 'DELETE' }),
   reorder: (lessonId: string, activityIds: string[]) =>
-    fetchApi(`/lessons/${lessonId}/activities/reorder`, { method: 'PUT', body: JSON.stringify({ activityIds }) }),
+    fetchApi(`/lessons/${lessonId}/activities/reorder`, { method: 'PUT', ... }),
 };
 ```
 
-## Related Files
-- `frontend/app/(student)/courses/[slug]/learn/[lessonId]/page.tsx`
-- `frontend/app/instructor/courses/[id]/page.tsx`
-- `frontend/lib/api.ts`
-
 ## Implementation Steps
 
-1. **Add Activities API**
-   - Create `activitiesApi` in api.ts
-   - Add query keys
+### Completed Steps
+1. ✅ **Add Activities API** - Created activitiesApi in api.ts
+2. ✅ **Create Activity Components** - ActivityList with VideoModal
+3. ✅ **Update Student Lesson Page** - Integrated ActivityList with callbacks
 
-2. **Create Activity Components**
-   - ActivityList
-   - ActivityItem
-   - ActivityEditor
+### Pending Steps
+4. ✅ **Drag-drop reorder** - Add @dnd-kit support for reordering activities (✅ Done 2026-03-31)
+5. ✅ **Edit activity form** - Add edit modal to ActivityList (✅ Done 2026-03-31)
+6. ✅ **Activity type selector** - When creating, show type-specific options (✅ Done 2026-03-31)
 
-3. **Update Student Lesson Page**
-   - Replace type-specific rendering with activity list
-   - Render video/file inline
-   - Show quiz/flashcard buttons
+## UI Mockups (Implemented)
 
-4. **Update Instructor Course Editor**
-   - Add activity management UI
-   - Activity type selector
-   - Reorder support
-
-## UI Mockups
-
-### Lesson Page - Activities List
+### Lesson Page - Activities List ✅
 ```
 ┌─────────────────────────────────────┐
 │ 📹 Introduction Video               │
-│   [Watch Video]                    │
+│   [▶ Play Video]                   │
 ├─────────────────────────────────────┤
 │ 📝 Chapter Quiz                     │
 │   10 questions • 15 min             │
@@ -105,33 +91,41 @@ export const activitiesApi = {
 │   [Study Now]                       │
 ├─────────────────────────────────────┤
 │ 📄 Reading Material                 │
-│   [Read Article]                    │
+│   [View]                           │
 └─────────────────────────────────────┘
 ```
 
-### Activity Editor
+### Video Player Modal ✅ (NEW)
 ```
 ┌─────────────────────────────────────┐
-│ Add Activity                        │
+│ Video Player                    [X] │
+├─────────────────────────────────────┤
+│                                     │
+│         [Video Content]             │
+│                                     │
+└─────────────────────────────────────┘
+```
+
+### Activity Create Form ✅
+```
+┌─────────────────────────────────────┐
+│ Create Activity                      │
 ├─────────────────────────────────────┤
 │ Type: [Quiz ▼]                      │
 │ Title: [Chapter 1 Quiz]             │
-│ [ ] Published                       │
 │                                     │
 │ [Create] [Cancel]                   │
 └─────────────────────────────────────┘
 ```
 
-## Todo List
-- [ ] Add activities API
-- [ ] Create activity components
-- [ ] Update lesson page
-- [ ] Update course editor
-
 ## Success Criteria
-- [ ] Multiple activities per lesson
-- [ ] Activity CRUD works
-- [ ] Drag reorder works
+
+- [x] Multiple activities per lesson
+- [x] Activity CRUD works (create, delete - basic)
+- [x] Video inline player works (fixed 2026-03-31)
+- [x] Flashcard routes to study page (fixed 2026-03-31)
+- [x] Drag reorder works (✅ Done 2026-03-31)
+- [x] Edit activity works (✅ Done 2026-03-31)
 
 ## Risk Assessment
 | Risk | Impact | Mitigation |
@@ -140,4 +134,6 @@ export const activitiesApi = {
 | Breaking student flow | Medium | Test thoroughly |
 
 ## Next Steps
-- Consider v2: Activity analytics, completion tracking
+1. Add drag-drop reorder with @dnd-kit
+2. Add edit activity form
+3. Add activity type selector for video/file content
