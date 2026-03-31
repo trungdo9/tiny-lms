@@ -32,13 +32,13 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
       },
     },
-    // Mobile Safari for responsive tests
-    {
-      name: 'Mobile Safari',
-      use: {
-        ...devices['iPhone 13'],
-      },
-    },
+    // Mobile Safari — commented out (requires `npx playwright install webkit --with-deps`)
+    // {
+    //   name: 'Mobile Safari',
+    //   use: {
+    //     ...devices['iPhone 13'],
+    //   },
+    // },
   ],
   webServer: process.env.CI
     ? undefined

@@ -6,8 +6,9 @@ import { BASE_URL } from './fixtures';
  * Generates unique test user credentials and stores for tests
  */
 
-// Generate unique test user
+// Generate unique test user (unique per test RUN, not just per module load)
 const timestamp = Date.now();
-export const TEST_USER_EMAIL = `test.user.${timestamp}@example.com`;
+const rand = Math.random().toString(36).slice(2, 8);
+export const TEST_USER_EMAIL = `test.user.${timestamp}.${rand}@example.com`;
 export const TEST_USER_PASSWORD = 'TestPass123!';
 export const TEST_USER_NAME = `Test User ${timestamp}`;
