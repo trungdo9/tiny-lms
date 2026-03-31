@@ -10,8 +10,24 @@ describe('FlashCardsService', () => {
   let prisma: MockPrismaService;
 
   const userId = 'user-1';
+  const otherUserId = 'other-user';
   const lessonId = 'lesson-1';
   const deckId = 'deck-1';
+
+  // Helper to build deck with required nested activity → lesson → course chain
+  const buildDeckWithActivity = (overrides: Record<string, any> = {}) => ({
+    ...buildFlashCardDeck({ lessonId, ...overrides }),
+    activity: {
+      id: 'activity-1',
+      lessonId,
+      activityType: 'flashcard',
+      lesson: {
+        id: lessonId,
+        courseId: 'course-1',
+        course: { id: 'course-1', instructorId: overrides.instructorId ?? userId },
+      },
+    },
+  });
 
   beforeEach(async () => {
     prisma = createMockPrismaService();
@@ -28,8 +44,12 @@ describe('FlashCardsService', () => {
 
   describe('findByLesson', () => {
     it('should return deck with cards', async () => {
-      const deck = buildFlashCardDeck({ lessonId, cards: [buildFlashCard()] });
-      prisma.flashCardDeck.findUnique.mockResolvedValue(deck);
+      const deck = {
+        ...buildFlashCardDeck({ lessonId }),
+        activity: { id: 'activity-1', lessonId },
+        cards: [buildFlashCard()],
+      };
+      prisma.flashCardDeck.findFirst.mockResolvedValue(deck);
 
       const result = await service.findByLesson(lessonId);
 
@@ -53,8 +73,10 @@ describe('FlashCardsService', () => {
         course: { id: 'course-1', instructorId: userId },
         section: { id: 'section-1' },
       });
-      prisma.flashCardDeck.findUnique.mockResolvedValue(null); // no existing deck
-      prisma.flashCardDeck.create.mockResolvedValue(buildFlashCardDeck(dto));
+      prisma.activity.findFirst.mockResolvedValue(null); // no existing deck
+      // Inside $transaction, tx = mock (see mock-prisma.ts), so set activity.create mock
+      prisma.activity.create.mockResolvedValue({ id: 'new-activity-1', lessonId, activityType: 'flashcard' });
+      prisma.flashCardDeck.create.mockResolvedValue(buildFlashCardDeck({ ...dto, activityId: 'new-activity-1' }));
 
       const result = await service.createDeck(userId, lessonId, dto as any, 'instructor');
 
@@ -64,11 +86,12 @@ describe('FlashCardsService', () => {
     it('should allow admin to create deck for any course', async () => {
       prisma.lesson.findUnique.mockResolvedValue({
         id: lessonId,
-        course: { id: 'course-1', instructorId: 'other-user' },
+        course: { id: 'course-1', instructorId: otherUserId },
         section: { id: 'section-1' },
       });
-      prisma.flashCardDeck.findUnique.mockResolvedValue(null);
-      prisma.flashCardDeck.create.mockResolvedValue(buildFlashCardDeck(dto));
+      prisma.activity.findFirst.mockResolvedValue(null);
+      prisma.activity.create.mockResolvedValue({ id: 'new-activity-1', lessonId, activityType: 'flashcard' });
+      prisma.flashCardDeck.create.mockResolvedValue(buildFlashCardDeck({ ...dto, activityId: 'new-activity-1' }));
 
       await expect(service.createDeck(userId, lessonId, dto as any, 'admin')).resolves.toBeDefined();
     });
@@ -76,7 +99,7 @@ describe('FlashCardsService', () => {
     it('should throw ForbiddenException if not course owner', async () => {
       prisma.lesson.findUnique.mockResolvedValue({
         id: lessonId,
-        course: { id: 'course-1', instructorId: 'other-user' },
+        course: { id: 'course-1', instructorId: otherUserId },
         section: { id: 'section-1' },
       });
 
@@ -89,7 +112,7 @@ describe('FlashCardsService', () => {
         course: { id: 'course-1', instructorId: userId },
         section: { id: 'section-1' },
       });
-      prisma.flashCardDeck.findUnique.mockResolvedValue(buildFlashCardDeck());
+      prisma.activity.findFirst.mockResolvedValue({ id: 'existing-activity', lessonId, activityType: 'flashcard' });
 
       await expect(service.createDeck(userId, lessonId, dto as any, 'instructor')).rejects.toThrow(BadRequestException);
     });
@@ -102,9 +125,8 @@ describe('FlashCardsService', () => {
 
   describe('updateDeck', () => {
     it('should throw BadRequestException when publishing deck with no cards', async () => {
-      prisma.flashCardDeck.findUnique.mockResolvedValue({
-        ...buildFlashCardDeck({ lessonId }),
-        lesson: { course: { instructorId: userId } },
+      prisma.flashCardDeck.findFirst.mockResolvedValue({
+        ...buildDeckWithActivity(),
         cards: [],
       });
 
@@ -116,11 +138,8 @@ describe('FlashCardsService', () => {
 
   describe('deleteDeck', () => {
     it('should delete deck owned by instructor', async () => {
-      prisma.flashCardDeck.findUnique.mockResolvedValue({
-        ...buildFlashCardDeck({ id: deckId, lessonId }),
-        lesson: { course: { instructorId: userId } },
-      });
-      prisma.flashCardDeck.delete.mockResolvedValue({});
+      prisma.flashCardDeck.findFirst.mockResolvedValue(buildDeckWithActivity());
+      prisma.activity.delete.mockResolvedValue({ id: 'activity-1' });
 
       const result = await service.deleteDeck(userId, lessonId, 'instructor');
 
@@ -128,31 +147,48 @@ describe('FlashCardsService', () => {
     });
 
     it('should throw ForbiddenException for non-owner', async () => {
-      prisma.flashCardDeck.findUnique.mockResolvedValue({
-        ...buildFlashCardDeck({ lessonId }),
-        lesson: { course: { instructorId: 'other-user' } },
-      });
+      prisma.flashCardDeck.findFirst.mockResolvedValue(buildDeckWithActivity({ instructorId: otherUserId }));
 
       await expect(service.deleteDeck(userId, lessonId, 'student')).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should allow admin to delete any deck', async () => {
+      prisma.flashCardDeck.findFirst.mockResolvedValue(buildDeckWithActivity({ instructorId: otherUserId }));
+      prisma.activity.delete.mockResolvedValue({ id: 'activity-1' });
+
+      const result = await service.deleteDeck(userId, lessonId, 'admin');
+
+      expect(result).toEqual({ success: true });
+    });
+
+    it('should throw NotFoundException when deck not found', async () => {
+      prisma.flashCardDeck.findFirst.mockResolvedValue(null);
+
+      await expect(service.deleteDeck(userId, lessonId, 'instructor')).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('createCard', () => {
     it('should create card with auto-increment order', async () => {
-      prisma.flashCardDeck.findUnique.mockResolvedValue({
-        ...buildFlashCardDeck({ id: deckId }),
-        lesson: { course: { instructorId: userId } },
-      });
+      prisma.flashCardDeck.findUnique.mockResolvedValue(buildDeckWithActivity());
       prisma.flashCard.aggregate.mockResolvedValue({ _max: { orderIndex: 2 } });
       prisma.flashCard.create.mockResolvedValue(buildFlashCard({ orderIndex: 3 }));
 
-      const result = await service.createCard(userId, deckId, { front: 'Q?', back: 'A' } as any, 'instructor');
+      await service.createCard(userId, deckId, { front: 'Q?', back: 'A' } as any, 'instructor');
 
       expect(prisma.flashCard.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ orderIndex: 3 }),
         }),
       );
+    });
+
+    it('should throw ForbiddenException for non-owner', async () => {
+      prisma.flashCardDeck.findUnique.mockResolvedValue(buildDeckWithActivity({ instructorId: otherUserId }));
+
+      await expect(
+        service.createCard(userId, deckId, { front: 'Q?', back: 'A' } as any, 'student'),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -198,7 +234,7 @@ describe('FlashCardsService', () => {
     });
 
     it('should throw ForbiddenException for other user session', async () => {
-      prisma.flashCardSession.findUnique.mockResolvedValue({ id: 'session-1', userId: 'other-user', totalCards: 5 });
+      prisma.flashCardSession.findUnique.mockResolvedValue({ id: 'session-1', userId: otherUserId, totalCards: 5 });
 
       await expect(
         service.completeSession(userId, 'session-1', { knownCards: 3, timeSpentSecs: 60 } as any),
@@ -208,14 +244,19 @@ describe('FlashCardsService', () => {
 
   describe('reorderCards', () => {
     it('should reorder cards in a transaction', async () => {
-      prisma.flashCardDeck.findUnique.mockResolvedValue({
-        ...buildFlashCardDeck({ id: deckId }),
-        lesson: { course: { instructorId: userId } },
-      });
+      prisma.flashCardDeck.findUnique.mockResolvedValue(buildDeckWithActivity());
 
       await service.reorderCards(userId, deckId, ['c1', 'c2', 'c3'], 'instructor');
 
       expect(prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException for non-owner', async () => {
+      prisma.flashCardDeck.findUnique.mockResolvedValue(buildDeckWithActivity({ instructorId: otherUserId }));
+
+      await expect(
+        service.reorderCards(userId, deckId, ['c1', 'c2', 'c3'], 'student'),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 });
