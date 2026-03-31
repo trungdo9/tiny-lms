@@ -4,7 +4,7 @@
 - **Date**: 2026-03-02
 - **Description**: Đảm bảo tất cả protected routes redirect đúng sau khi login
 - **Priority**: Medium
-- **Status**: Pending
+- **Status**: ✅ Completed
 
 ## Context
 - **Parent Plan**: plans/20260302-user-login-page/plan.md
@@ -44,13 +44,13 @@ Thêm check ở mỗi page để redirect nếu không có quyền
 Sử dụng Next.js middleware hoặc per-page guard
 
 ## Todo List
-- [ ] Create redirect utility
-- [ ] Update protected routes
-- [ ] Add role-based middleware
+- [x] Create redirect utility
+- [x] Update protected routes
+- [x] Add role-based middleware
 
 ## Success Criteria
-- [ ] Redirect hoạt động đúng theo role
-- [ ] User không thể truy cập unauthorized routes
+- [x] Redirect hoạt động đúng theo role
+- [x] User không thể truy cập unauthorized routes
 
 ## Risk Assessment
 - **Medium**: Cần test kỹ các redirect paths

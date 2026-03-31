@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { queryKeys } from '@/lib/query-keys';
+import { coursesApi } from '@/lib/api';
+import { Copy, X, Check, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 
 interface Quiz {
   id: string;
@@ -15,6 +17,163 @@ interface Quiz {
   course?: { title: string };
   isPublished: boolean;
   _count?: { attempts: number };
+}
+
+interface Lesson {
+  id: string;
+  title: string;
+  quiz?: { id: string };
+}
+
+interface Section {
+  id: string;
+  title: string;
+  lessons: Lesson[];
+}
+
+interface Course {
+  id: string;
+  title: string;
+  sections?: Section[];
+}
+
+// ─── Clone Quiz Modal ─────────────────────────────────────────────────────────
+
+function CloneQuizModal({
+  quiz,
+  onClose,
+  onCloned,
+}: {
+  quiz: Quiz;
+  onClose: () => void;
+  onCloned: () => void;
+}) {
+  const [targetCourseId, setTargetCourseId] = useState('');
+  const [targetLessonId, setTargetLessonId] = useState('');
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [targetCourse, setTargetCourse] = useState<Course | null>(null);
+
+  // Fetch instructor's courses
+  const { data: courses = [] } = useQuery<Course[]>({
+    queryKey: queryKeys.courses.instructor({}),
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/courses/instructor`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch courses');
+      return res.json();
+    },
+  });
+
+  // Fetch sections when a course is selected
+  const { data: sections = [], isLoading: loadingSections } = useQuery<Section[]>({
+    queryKey: ['sections', targetCourseId],
+    queryFn: async () => {
+      if (!targetCourseId) return [];
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/courses/${targetCourseId}/sections`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch sections');
+      return res.json();
+    },
+    enabled: !!targetCourseId,
+  });
+
+  const availableLessons = sections.flatMap((s) =>
+    s.lessons.filter((l) => !l.quiz).map((l) => ({ ...l, sectionTitle: s.title }))
+  );
+
+  const handleClone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!targetLessonId) return;
+    setSaving(true);
+    setError('');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes/${quiz.id}/clone`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ targetLessonId }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Không clone được quiz');
+      }
+      onCloned();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h2 className="text-lg font-bold">Clone Quiz</h2>
+            <p className="text-sm text-gray-500">Sao chép <strong>{quiz.title}</strong> sang bài học khác</p>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded"><X className="w-5 h-5 text-gray-400" /></button>
+        </div>
+        {error && <div className="mb-3 p-3 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>}
+        <form onSubmit={handleClone} className="space-y-4">
+          {/* Course selector */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Khóa học đích</label>
+            <select
+              value={targetCourseId}
+              onChange={(e) => { setTargetCourseId(e.target.value); setTargetLessonId(''); setTargetCourse(null); }}
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+            >
+              <option value="">-- Chọn khóa học --</option>
+              {courses.map((c) => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </select>
+          </div>
+          {/* Lesson selector */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Bài học đích</label>
+            {loadingSections ? (
+              <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                <Loader2 className="w-4 h-4 animate-spin" /> Đang tải bài học...
+              </div>
+            ) : targetCourseId ? (
+              <select
+                value={targetLessonId}
+                onChange={(e) => setTargetLessonId(e.target.value)}
+                disabled={availableLessons.length === 0}
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-400 outline-none disabled:opacity-50"
+              >
+                <option value="">-- Chọn bài học --</option>
+                {availableLessons.length === 0 && <option disabled>Khóa học này không có bài học trống</option>}
+                {availableLessons.map((l) => (
+                  <option key={l.id} value={l.id}>{l.sectionTitle} › {l.title}</option>
+                ))}
+              </select>
+            ) : (
+              <div className="text-sm text-gray-400 py-2 border rounded-lg bg-gray-50">Chọn khóa học trước</div>
+            )}
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button type="submit" disabled={saving || !targetLessonId} className="flex-1 py-2 bg-amber-400 hover:bg-amber-500 text-slate-900 font-semibold rounded-lg text-sm transition-colors disabled:opacity-50">
+              {saving ? 'Đang clone...' : '⎘ Clone Quiz'}
+            </button>
+            <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">Hủy</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 async function fetchInstructorQuizzes() {
@@ -33,6 +192,7 @@ export default function QuizzesPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState('');
+  const [cloneTarget, setCloneTarget] = useState<Quiz | null>(null);
 
   const { data: quizzes = [], isLoading } = useQuery<Quiz[]>({
     queryKey: queryKeys.quizzes.list(),
@@ -68,12 +228,7 @@ export default function QuizzesPage() {
   };
 
   const handleClone = (quiz: Quiz) => {
-    if (!quiz.courseId) {
-      setError('Quiz này chưa gắn vào khóa học nào, hãy clone từ trang outline của khóa học đích.');
-      return;
-    }
-
-    router.push(`/instructor/courses/${quiz.courseId}/outline`);
+    setCloneTarget(quiz);
   };
 
   if (isLoading) {
@@ -163,9 +318,8 @@ export default function QuizzesPage() {
                         <button
                           onClick={() => handleClone(quiz)}
                           className="px-3 py-1 text-sm border rounded hover:bg-gray-50"
-                          title="Clone from the course outline so you can choose the target lesson"
                         >
-                          Clone in Outline
+                          ⎘ Clone
                         </button>
                         <button
                           onClick={() => handleDelete(quiz.id)}
@@ -180,6 +334,17 @@ export default function QuizzesPage() {
               </tbody>
             </table>
           </div>
+        )}
+
+        {cloneTarget && (
+          <CloneQuizModal
+            quiz={cloneTarget}
+            onClose={() => setCloneTarget(null)}
+            onCloned={() => {
+              setCloneTarget(null);
+              queryClient.invalidateQueries({ queryKey: queryKeys.quizzes.list() });
+            }}
+          />
         )}
       </div>
     </div>

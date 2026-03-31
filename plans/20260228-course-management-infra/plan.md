@@ -2,7 +2,7 @@
 
 **Task slug:** `course-management-infra`
 **Agent:** `@frontend-specialist`
-**Status:** 🟡 Ready for Review
+**Status:** ✅ VERIFIED COMPLETE (2026-03-31)
 **Depends on:** `20260228-tanstack-query-migration` _(Phase 3 — Batch C, task 3.1 phải hoàn thành trước)_
 
 ---

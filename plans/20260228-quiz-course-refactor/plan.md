@@ -3,7 +3,7 @@
 **Task slug:** `20260228-quiz-course-refactor`
 **Ngày:** 2026-02-28
 **Agent:** `@backend-specialist` + `@frontend-specialist`
-**Status:** ⚠️ Reviewed — action required (see `reports/260318-code-review-quiz-course-refactor.md`)
+**Status:** ⚠️ CODE COMPLETE — DB migration pending (requires Supabase access + Node 24)
 
 ---
 

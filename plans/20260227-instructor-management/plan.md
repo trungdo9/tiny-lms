@@ -95,19 +95,20 @@ frontend/app/(instructor)/
 ## Success Criteria
 - [x] Instructor can view list of courses
 - [x] Instructor can create/edit/delete courses
-- [ ] Instructor can clone courses
+- [x] Instructor can clone courses
 - [x] Instructor can view list of quizzes
 - [x] Instructor can create/edit/delete quizzes
-- [ ] Instructor can clone quizzes
+- [x] Instructor can clone quizzes
 - [x] Instructor can edit/delete questions in bank
 
 ---
 
-## Status: ✅ COMPLETED
+## Status: ✅ VERIFIED COMPLETE (2026-03-31)
 
 **Implemented features:**
 - Instructor courses list at `/instructor/courses`
 - Course creation/editing at `/instructor/courses/create` and `/instructor/courses/[id]`
 - Instructor quizzes at `/instructor/quizzes`
 - Question banks management at `/instructor/question-banks/*`
-- Note: Clone feature not implemented
+- Course clone via `CloneCourseModal` (2-step: name + quiz import mode) — `POST /courses/:id/clone`
+- Quiz clone via `CloneQuizModal` (course → lesson picker) — `POST /quizzes/:id/clone`

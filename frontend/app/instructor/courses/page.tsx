@@ -6,6 +6,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { queryKeys } from '@/lib/query-keys';
+import { MoreHorizontal, Edit, Copy, Trash2, X, Check } from 'lucide-react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -237,6 +238,20 @@ function CoursesPageContent() {
 
   const [cloneTarget, setCloneTarget] = useState<Course | null>(null);
   const [error, setError] = useState('');
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  // Close menu on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Read filter values from URL
   const search = searchParams.get('q') ?? '';
@@ -464,10 +479,14 @@ className = "text-amber-600 hover:underline font-medium text-sm"
                 </thead>
                 < tbody className = "divide-y divide-gray-100" >
                 {
-                  courses.map((course) => {
+                  courses.map((course, idx) => {
                     const st = STATUS_CONFIG[course.status] || { label: course.status, cls: 'bg-gray-100 text-gray-500' };
                     return (
-                      <tr key= { course.id } className = "hover:bg-gray-50 transition-colors" >
+                      <tr
+                        key= { course.id }
+                        className = "hover:bg-gray-50 transition-colors animate-in fade-in slide-in-from-top-2"
+                        style={{ animationDelay: `${idx * 50}ms`, animationFillMode: 'backwards' }}
+                      >
                         <td className="px-6 py-4" >
                           <Link
                           href={ `/instructor/courses/${course.id}` }
@@ -498,27 +517,61 @@ className = "text-amber-600 hover:underline font-medium text-sm"
       < td className = "px-4 py-4 text-sm text-gray-600" > { course.sectionCount ?? 0 } </td>
         < td className = "px-4 py-4 text-sm text-gray-600" > { course.enrollmentCount ?? 0 } </td>
           < td className = "px-4 py-4" >
-            <div className="flex justify-end gap-2" >
-              <Link
-                            href={ `/instructor/courses/${course.id}` }
-className = "px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-  >
-  Chỉnh sửa
-    </Link>
-    < button
-onClick = {() => setCloneTarget(course)}
-className = "px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-  >
-                            ⎘ Clone
-  </button>
-  < button
-onClick = {() => handleDelete(course.id)}
-className = "px-3 py-1.5 text-xs font-medium text-red-500 border border-red-100 rounded-lg hover:bg-red-50 transition-colors"
-  >
-  Xóa
-  </button>
-  </div>
-  </td>
+            {deleteConfirmId === course.id ? (
+              // Inline delete confirm
+              <div className="flex items-center gap-2 animate-in slide-in-from-right-2">
+                <span className="text-xs text-red-600 font-medium">Xóa?</span>
+                <button
+                  onClick={() => { handleDelete(course.id); setDeleteConfirmId(null); }}
+                  className="p-1.5 bg-red-50 border border-red-200 rounded text-red-600 hover:bg-red-100"
+                  title="Xác nhận xóa"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="p-1.5 bg-gray-50 border border-gray-200 rounded text-gray-500 hover:bg-gray-100"
+                  title="Hủy"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              // Kebab menu
+              <div className="relative flex justify-end" ref={openMenuId === course.id ? menuRef as React.RefObject<HTMLDivElement> : null}>
+                <button
+                  onClick={() => setOpenMenuId(openMenuId === course.id ? null : course.id)}
+                  className="p-1.5 rounded hover:bg-gray-100 text-gray-400 transition-colors"
+                  aria-label="Mở menu"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+                {openMenuId === course.id && (
+                  <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[120px] animate-in fade-in slide-in-from-top-2">
+                    <Link
+                      href={`/instructor/courses/${course.id}`}
+                      onClick={() => setOpenMenuId(null)}
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+                    >
+                      <Edit className="w-3.5 h-3.5" /> Chỉnh sửa
+                    </Link>
+                    <button
+                      onClick={() => { setCloneTarget(course); setOpenMenuId(null); }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+                    >
+                      <Copy className="w-3.5 h-3.5" /> Clone
+                    </button>
+                    <button
+                      onClick={() => { setDeleteConfirmId(course.id); setOpenMenuId(null); }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Xóa
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </td>
   </tr>
                   );
                 })}

@@ -4,7 +4,7 @@
 - **Date**: 2026-03-02
 - **Description**: Cập nhật login page với role-based redirect và UI phù hợp cho end user
 - **Priority**: High
-- **Status**: Pending
+- **Status**: ✅ Completed
 
 ## Context
 - **Parent Plan**: plans/20260302-user-login-page/plan.md
@@ -62,14 +62,14 @@ const handleSubmit = async (e: React.FormEvent) => {
 - Thêm social login buttons
 
 ## Todo List
-- [ ] Update auth-context with role fetching
-- [ ] Update login page with redirect logic
-- [ ] Update UI if needed
+- [x] Update auth-context with role fetching
+- [x] Update login page with redirect logic
+- [x] Update UI if needed
 
 ## Success Criteria
-- [ ] User login thành công
-- [ ] Redirect đúng theo role (admin/instructor/student)
-- [ ] UI vẫn hoạt động tốt
+- [x] User login thành công
+- [x] Redirect đúng theo role (admin/instructor/student)
+- [x] UI vẫn hoạt động tốt
 
 ## Risk Assessment
 - **Low**: Thay đổi nhỏ, chỉ ảnh hưởng login flow
