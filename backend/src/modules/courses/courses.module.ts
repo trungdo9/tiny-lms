@@ -7,11 +7,10 @@ import { ReviewsController } from './reviews.controller';
 import { ReviewsService } from './reviews.service';
 import { PrismaService } from '../../common/prisma.service';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { SupabaseService } from '../../common/supabase.service';
 
 @Module({
   controllers: [CoursesController, CourseInstructorsController, ReviewsController],
-  providers: [CoursesService, CourseInstructorsService, ReviewsService, PrismaService, RolesGuard, SupabaseService],
+  providers: [CoursesService, CourseInstructorsService, ReviewsService, PrismaService, RolesGuard],
   exports: [CoursesService],
 })
 export class CoursesModule {}

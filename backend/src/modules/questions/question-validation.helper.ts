@@ -15,6 +15,36 @@ export function validateQuestionDto(dto: CreateQuestionDto) {
       throw new BadRequestException('Single/True-False questions must have exactly one correct answer');
     }
   }
+
+  // drag_drop_text validation
+  if (dto.type === 'drag_drop_text') {
+    if (!dto.content.match(/\[slot_\d+\]/)) {
+      throw new BadRequestException('drag_drop_text content must include at least one [slot_N] marker');
+    }
+    const correctTokens = dto.options?.filter(o => o.isCorrect && o.matchKey);
+    if (!correctTokens?.length) {
+      throw new BadRequestException('drag_drop_text must have at least one correct token with matchKey');
+    }
+  }
+
+  // drag_drop_image validation
+  if (dto.type === 'drag_drop_image') {
+    if (!dto.mediaUrl) {
+      throw new BadRequestException('drag_drop_image requires a mediaUrl');
+    }
+    const zones = dto.options?.filter(o => o.isCorrect && o.matchKey && o.matchValue);
+    if (!zones?.length) {
+      throw new BadRequestException('drag_drop_image must have at least one zone with matchKey + matchValue');
+    }
+    for (const zone of zones) {
+      try {
+        const c = JSON.parse(zone.matchValue!);
+        if (c.x === undefined || c.y === undefined) throw new Error();
+      } catch {
+        throw new BadRequestException('Zone matchValue must be JSON { x, y, w, h }');
+      }
+    }
+  }
 }
 
 export async function checkBankOwnership(prisma: PrismaService, bankId: string, userId: string, userRole: string) {

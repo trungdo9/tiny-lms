@@ -16,14 +16,13 @@ const reviews_controller_1 = require("./reviews.controller");
 const reviews_service_1 = require("./reviews.service");
 const prisma_service_1 = require("../../common/prisma.service");
 const roles_guard_1 = require("../../common/guards/roles.guard");
-const supabase_service_1 = require("../../common/supabase.service");
 let CoursesModule = class CoursesModule {
 };
 exports.CoursesModule = CoursesModule;
 exports.CoursesModule = CoursesModule = __decorate([
     (0, common_1.Module)({
         controllers: [courses_controller_1.CoursesController, course_instructors_controller_1.CourseInstructorsController, reviews_controller_1.ReviewsController],
-        providers: [courses_service_1.CoursesService, course_instructors_service_1.CourseInstructorsService, reviews_service_1.ReviewsService, prisma_service_1.PrismaService, roles_guard_1.RolesGuard, supabase_service_1.SupabaseService],
+        providers: [courses_service_1.CoursesService, course_instructors_service_1.CourseInstructorsService, reviews_service_1.ReviewsService, prisma_service_1.PrismaService, roles_guard_1.RolesGuard],
         exports: [courses_service_1.CoursesService],
     })
 ], CoursesModule);

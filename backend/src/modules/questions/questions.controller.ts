@@ -1,4 +1,9 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, Request, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as path from 'path';
+import * as fs from 'fs';
+import { randomUUID } from 'crypto';
+import { diskStorage } from 'multer';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { QuestionsService } from './questions.service';
@@ -22,6 +27,38 @@ export class QuestionsController {
     private service: QuestionsService,
     private management: QuestionsManagementService,
   ) {}
+
+  @ApiOperation({ summary: 'Upload an image for drag_drop_image questions' })
+  @ApiResponse({ status: 201, description: 'Image uploaded' })
+  @ApiResponse({ status: 400, description: 'Only images allowed, max 5MB' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Post('upload-image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (_req, _file, cb) => {
+          const dir = path.join(process.cwd(), 'public', 'uploads', 'images');
+          fs.mkdirSync(dir, { recursive: true });
+          cb(null, dir);
+        },
+        filename: (_req, file, cb) => {
+          const ext = path.extname(file.originalname);
+          cb(null, `${randomUUID()}${ext}`);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+          cb(new BadRequestException('Only images allowed'), false);
+        } else {
+          cb(null, true);
+        }
+      },
+    }),
+  )
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    return { url: `/uploads/images/${file.filename}` };
+  }
 
   @ApiOperation({ summary: 'List questions in a bank with filters and pagination' })
   @ApiResponse({ status: 200, description: 'Paginated questions list' })

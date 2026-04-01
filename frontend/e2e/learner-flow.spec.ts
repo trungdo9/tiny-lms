@@ -44,6 +44,34 @@ test.describe('Registration', () => {
     // Registration should show success message
     expect(isSuccess).toBeTruthy();
   });
+
+  test('should show error with duplicate email', async ({ page }) => {
+    await page.goto(`${BASE_URL}/register`);
+    await page.waitForLoadState('domcontentloaded');
+
+    // Fill form with the same email as registered user
+    const nameField = page.locator('input[placeholder="John Doe"]');
+    await nameField.fill(TEST_USER_NAME);
+
+    await page.fill('input[type="email"]', TEST_USER_EMAIL);
+    await page.fill('input[type="password"]', TEST_USER_PASSWORD);
+
+    // Submit registration
+    await page.click('button[type="submit"]');
+
+    // Wait for error response
+    await page.waitForTimeout(3000);
+
+    // Check page content for error message
+    const pageContent = await page.content();
+    const hasError = pageContent.toLowerCase().includes('already') ||
+                     pageContent.toLowerCase().includes('exists') ||
+                     pageContent.toLowerCase().includes('taken') ||
+                     pageContent.toLowerCase().includes('duplicate');
+
+    // Should show duplicate email error
+    expect(hasError).toBeTruthy();
+  });
 });
 
 test.describe('Login', () => {

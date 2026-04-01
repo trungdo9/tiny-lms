@@ -3,7 +3,7 @@
 **Parent plan:** [plan.md](./plan.md)
 **Date:** 2026-03-21
 **Priority:** P1
-**Status:** Pending
+**Status:** ✅ Complete
 **Depends on:** Phase 1 (backend accepts new types + upload endpoint)
 
 ---

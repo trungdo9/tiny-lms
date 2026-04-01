@@ -1,7 +1,7 @@
 # Plan: Drag-Drop Question Types
 
 **Date:** 2026-03-21
-**Status:** Planning
+**Status:** ✅ Complete
 **Priority:** P1
 
 ## Summary
@@ -14,10 +14,10 @@ No DB migration required — existing `QuestionOption` schema (matchKey, matchVa
 
 | # | Phase | File | Status |
 |---|-------|------|--------|
-| 1 | Backend — Types + Scoring | [phase-01-backend.md](./phase-01-backend.md) | Pending |
-| 2 | Frontend — Student Attempt Components | [phase-02-student-attempt.md](./phase-02-student-attempt.md) | Pending |
-| 3 | Frontend — Instructor Question Builder + Image Upload | [phase-03-instructor-builder.md](./phase-03-instructor-builder.md) | Pending |
-| 4 | Frontend — Result Review Display | [phase-04-result-review.md](./phase-04-result-review.md) | Pending |
+| 1 | Backend — Types + Scoring | [phase-01-backend.md](./phase-01-backend.md) | ✅ Complete |
+| 2 | Frontend — Student Attempt Components | [phase-02-student-attempt.md](./phase-02-student-attempt.md) | ✅ Complete |
+| 3 | Frontend — Instructor Question Builder + Image Upload | [phase-03-instructor-builder.md](./phase-03-instructor-builder.md) | ✅ Complete |
+| 4 | Frontend — Result Review Display | [phase-04-result-review.md](./phase-04-result-review.md) | ✅ Complete |
 
 ## Key Design Decisions
 

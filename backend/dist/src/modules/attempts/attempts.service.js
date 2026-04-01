@@ -175,24 +175,40 @@ let AttemptsService = class AttemptsService {
                     showExplanation: attempt.quiz.showExplanation,
                 },
             },
-            questions: pageQuestions.map((aq) => ({
-                id: aq.id,
-                questionId: aq.questionId,
-                orderIndex: aq.orderIndex,
-                isFlagged: aq.isFlagged,
-                isAnswered: !!answersMap.has(aq.questionId),
-                question: {
-                    content: aq.question.content,
-                    type: aq.question.type,
-                    explanation: attempt.status !== 'in_progress' ? aq.question.explanation : undefined,
-                    options: aq.question.options?.map((o) => ({
-                        id: o.id,
-                        content: o.content,
-                        isCorrect: attempt.quiz.showCorrectAnswer || attempt.status !== 'in_progress' ? o.isCorrect : undefined,
-                    })),
-                },
-                answer: answersMap.get(aq.questionId),
-            })),
+            questions: pageQuestions.map((aq) => {
+                const isActive = attempt.status === 'in_progress';
+                const type = aq.question.type;
+                return {
+                    id: aq.id,
+                    questionId: aq.questionId,
+                    orderIndex: aq.orderIndex,
+                    isFlagged: aq.isFlagged,
+                    isAnswered: !!answersMap.has(aq.questionId),
+                    question: {
+                        content: aq.question.content,
+                        type: aq.question.type,
+                        mediaUrl: aq.question.mediaUrl,
+                        explanation: attempt.status !== 'in_progress' ? aq.question.explanation : undefined,
+                        options: aq.question.options?.map((o) => {
+                            if (type === 'drag_drop_text') {
+                                return { id: o.id, content: o.content, orderIndex: o.orderIndex };
+                            }
+                            if (type === 'drag_drop_image') {
+                                return { id: o.id, content: o.content, orderIndex: o.orderIndex, matchValue: o.matchValue };
+                            }
+                            return {
+                                id: o.id,
+                                content: o.content,
+                                orderIndex: o.orderIndex,
+                                matchKey: o.matchKey,
+                                matchValue: o.matchValue,
+                                isCorrect: (!isActive || attempt.quiz.showCorrectAnswer) ? o.isCorrect : undefined,
+                            };
+                        }),
+                    },
+                    answer: answersMap.get(aq.questionId),
+                };
+            }),
         };
     }
     async saveAnswer(attemptId, userId, dto) {
@@ -365,6 +381,42 @@ let AttemptsService = class AttemptsService {
                         if (clozeScore > 0) {
                             isCorrect = clozeScore === 1;
                             scoreEarned = Math.round(clozeScore * Number(question.defaultScore));
+                        }
+                    }
+                }
+                else if (question.type === 'drag_drop_text') {
+                    const matchAnswer = answer.matchAnswer;
+                    if (matchAnswer) {
+                        const correctTokens = question.options.filter((o) => o.isCorrect && o.matchKey);
+                        let correctCount = 0;
+                        for (const token of correctTokens) {
+                            if (!token.matchKey)
+                                continue;
+                            const placed = matchAnswer[token.matchKey];
+                            if (placed?.trim().toLowerCase() === token.content.trim().toLowerCase())
+                                correctCount++;
+                        }
+                        if (correctTokens.length > 0) {
+                            const ratio = correctCount / correctTokens.length;
+                            isCorrect = ratio === 1;
+                            scoreEarned = Math.round(ratio * Number(question.defaultScore));
+                        }
+                    }
+                }
+                else if (question.type === 'drag_drop_image') {
+                    const matchAnswer = answer.matchAnswer;
+                    if (matchAnswer) {
+                        const zones = question.options.filter((o) => o.isCorrect && o.matchKey);
+                        let correctCount = 0;
+                        for (const zone of zones) {
+                            const placed = matchAnswer[zone.id];
+                            if (placed?.trim().toLowerCase() === zone.content.trim().toLowerCase())
+                                correctCount++;
+                        }
+                        if (zones.length > 0) {
+                            const ratio = correctCount / zones.length;
+                            isCorrect = ratio === 1;
+                            scoreEarned = Math.round(ratio * Number(question.defaultScore));
                         }
                     }
                 }

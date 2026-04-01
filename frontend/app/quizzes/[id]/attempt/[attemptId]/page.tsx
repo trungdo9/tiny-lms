@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { DndContext, DragEndEvent, DragOverlay, PointerSensor, useDraggable, useDroppable, closestCenter } from '@dnd-kit/core';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -26,6 +27,7 @@ interface Question {
   question: {
     content: string;
     type: string;
+    mediaUrl?: string;
     explanation?: string;
     options?: QuestionOption[];
   };
@@ -537,6 +539,26 @@ export default function QuizAttemptPage() {
                   onChange={(textAnswer) => handleAnswerChange(q.questionId, 'textAnswer', textAnswer)}
                 />
               )}
+
+              {/* Drag Drop Text */}
+              {q.question.type === 'drag_drop_text' && (
+                <DragDropTextInput
+                  content={q.question.content}
+                  options={q.question.options || []}
+                  answer={(q.answer?.matchAnswer as Record<string, string>) || {}}
+                  onChange={(val) => handleAnswerChange(q.questionId, 'matchAnswer', val)}
+                />
+              )}
+
+              {/* Drag Drop Image */}
+              {q.question.type === 'drag_drop_image' && (
+                <DragDropImageInput
+                  mediaUrl={q.question.mediaUrl || ''}
+                  options={q.question.options || []}
+                  answer={(q.answer?.matchAnswer as Record<string, string>) || {}}
+                  onChange={(val) => handleAnswerChange(q.questionId, 'matchAnswer', val)}
+                />
+              )}
             </div>
           ))}
 
@@ -817,5 +839,293 @@ function ClozeInput({
         </div>
       )}
     </div>
+  );
+}
+
+// Drag Drop Text Input
+function DragDropTextInput({
+  content,
+  options,
+  answer,
+  onChange,
+}: {
+  content: string;
+  options: QuestionOption[];
+  answer: Record<string, string>;
+  onChange: (answer: Record<string, string>) => void;
+}) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Split content by slot markers
+  const parts = content.split(/(\[[^\]]+\])/);
+
+  // Tokens = all options; placed tokens are dimmed in the bank
+  const placedContents = new Set(Object.values(answer));
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+    if (!over) return;
+
+    const tokenContent = active.id as string;
+    const overId = over.id as string;
+
+    // Dropped on a slot
+    if (overId.startsWith('slot_')) {
+      // If this slot already has a token, swap it back
+      const existing = Object.entries(answer).find(([, v]) => v === tokenContent);
+      if (existing) {
+        const [existingSlot] = existing;
+        onChange({ ...answer, [existingSlot]: answer[overId] || '', [overId]: tokenContent });
+      } else {
+        onChange({ ...answer, [overId]: tokenContent });
+      }
+    }
+
+    // Dropped back on word bank — remove from slot
+    if (overId === 'word-bank') {
+      const newAnswer = { ...answer };
+      for (const [slot, val] of Object.entries(newAnswer)) {
+        if (val === tokenContent) {
+          delete newAnswer[slot];
+          break;
+        }
+      }
+      onChange(newAnswer);
+    }
+  };
+
+  const activeOption = options.find((o) => o.id === activeId || o.content === activeId);
+
+  return (
+    <DndContext
+      sensors={[{ sensor: PointerSensor, options: { activationConstraint: { distance: 5 } } }]}
+      collisionDetection={closestCenter}
+      onDragStart={({ active }) => setActiveId(active.id as string)}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="space-y-4">
+        {/* Text with droppable slots */}
+        <div className="text-lg leading-relaxed p-4 bg-gray-50 rounded-lg">
+          {parts.map((part, index) => {
+            const slotMatch = part.match(/^\[slot_(\d+)\]$/);
+            if (slotMatch) {
+              const slotId = `slot_${slotMatch[1]}`;
+              const placedContent = answer[slotId];
+              return (
+                <DroppableSlot key={index} id={slotId} filled={!!placedContent} content={placedContent} />
+              );
+            }
+            return <span key={index}>{part}</span>;
+          })}
+        </div>
+
+        {/* Word bank — droppable area to remove tokens */}
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <p className="text-sm text-gray-600 mb-3">Word Bank</p>
+          <DroppableZone id="word-bank" className="flex flex-wrap gap-2 min-h-[44px] border-2 border-dashed border-gray-300 rounded-lg p-2">
+            {options.map((opt) => (
+              <DraggableToken
+                key={opt.id}
+                id={opt.id}
+                content={opt.content}
+                isPlaced={placedContents.has(opt.content)}
+                isDragging={activeId === opt.id}
+              />
+            ))}
+          </DroppableZone>
+        </div>
+      </div>
+
+      <DragOverlay>
+        {activeId ? (
+          <div className="px-4 py-2 bg-blue-100 border-2 border-blue-400 rounded-lg text-base shadow-lg">
+            {activeOption?.content || activeId}
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
+  );
+}
+
+function DroppableSlot({ id, filled, content }: { id: string; filled: boolean; content?: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+
+  return (
+    <span
+      ref={setNodeRef}
+      className={`inline-flex items-center justify-center mx-1 px-3 py-1 rounded-lg border-2 min-w-[80px] text-center transition-all ${
+        filled
+          ? 'bg-blue-50 border-blue-400 text-blue-700 font-medium'
+          : 'bg-white border-dashed border-gray-400 text-gray-400'
+      } ${isOver ? 'ring-2 ring-blue-400' : ''}`}
+    >
+      {filled ? content : id}
+    </span>
+  );
+}
+
+function DraggableToken({ id, content, isPlaced, isDragging }: { id: string; content: string; isPlaced: boolean; isDragging: boolean }) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
+
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+    : undefined;
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      style={style}
+      className={`px-4 py-2 rounded-lg border-2 cursor-grab text-base transition-all ${
+        isDragging
+          ? 'border-blue-400 bg-blue-50 opacity-50'
+          : isPlaced
+          ? 'bg-gray-200 border-gray-300 text-gray-400 opacity-50'
+          : 'bg-white border-blue-300 text-blue-700 hover:border-blue-400 hover:bg-blue-50'
+      }`}
+    >
+      {content}
+    </div>
+  );
+}
+
+function DroppableZone({ id, children, className = '', style }: { id: string; children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${className} ${isOver ? 'border-blue-400 bg-blue-50' : ''}`}
+      style={style}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Drag Drop Image Input
+function DragDropImageInput({
+  mediaUrl,
+  options,
+  answer,
+  onChange,
+}: {
+  mediaUrl: string;
+  options: QuestionOption[];
+  answer: Record<string, string>;
+  onChange: (answer: Record<string, string>) => void;
+}) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Zone options = those with matchValue (JSON coords); distractors = matchValue is null/undefined
+  const zoneOptions = options.filter((o) => o.matchValue != null);
+  const labelOptions = options.filter((o) => o.matchValue == null);
+  const placedLabels = new Set(Object.values(answer));
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+    if (!over) return;
+
+    const labelContent = active.id as string;
+    const overId = over.id as string;
+
+    // Dropped on a zone
+    if (overId.startsWith('zone_')) {
+      // Clear this label from any zone it was in before
+      const newAnswer = { ...answer };
+      for (const [zoneId, val] of Object.entries(newAnswer)) {
+        if (val === labelContent) {
+          delete newAnswer[zoneId];
+        }
+      }
+      // If target zone already has a label, put it back in pool
+      newAnswer[overId] = labelContent;
+      onChange(newAnswer);
+    }
+
+    // Dropped back on label pool — remove from zones
+    if (overId === 'label-pool') {
+      const newAnswer = { ...answer };
+      for (const [zoneId, val] of Object.entries(newAnswer)) {
+        if (val === labelContent) {
+          delete newAnswer[zoneId];
+        }
+      }
+      onChange(newAnswer);
+    }
+  };
+
+  const activeOption = labelOptions.find((o) => o.id === activeId || o.content === activeId);
+
+  return (
+    <DndContext
+      sensors={[{ sensor: PointerSensor, options: { activationConstraint: { distance: 5 } } }]}
+      collisionDetection={closestCenter}
+      onDragStart={({ active }) => setActiveId(active.id as string)}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="space-y-4">
+        {/* Image with droppable zones */}
+        <div className="relative aspect-video w-full overflow-hidden rounded-lg border-2 border-gray-200">
+          <img src={mediaUrl} alt="Question media" className="w-full h-full object-contain" />
+
+          {zoneOptions.map((zone) => {
+            let coords = { x: 0, y: 0, w: 10, h: 10 };
+            try {
+              if (zone.matchValue) coords = JSON.parse(zone.matchValue);
+            } catch { /* use defaults */ }
+
+            const placedLabel = answer[zone.id];
+            return (
+              <DroppableZone
+                key={zone.id}
+                id={zone.id}
+                className="absolute border-2 rounded-lg transition-all flex items-center justify-center text-xs"
+                style={{
+                  left: `${coords.x}%`,
+                  top: `${coords.y}%`,
+                  width: `${coords.w}%`,
+                  height: `${coords.h}%`,
+                  transform: 'translate(-50%, -50%)',
+                  borderColor: placedLabel ? '#3b82f6' : '#9ca3af',
+                  backgroundColor: placedLabel ? 'rgba(59,130,246,0.15)' : 'rgba(229,231,235,0.5)',
+                }}
+              >
+                <span className={`font-medium text-center px-1 ${placedLabel ? 'text-blue-700' : 'text-gray-500'}`}>
+                  {placedLabel || 'Drop here'}
+                </span>
+              </DroppableZone>
+            );
+          })}
+        </div>
+
+        {/* Label pool — droppable area to remove labels */}
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <p className="text-sm text-gray-600 mb-3">Labels</p>
+          <DroppableZone id="label-pool" className="flex flex-wrap gap-2 min-h-[44px] border-2 border-dashed border-gray-300 rounded-lg p-2">
+            {labelOptions.map((opt) => (
+              <DraggableToken
+                key={opt.id}
+                id={opt.id}
+                content={opt.content}
+                isPlaced={placedLabels.has(opt.content)}
+                isDragging={activeId === opt.id}
+              />
+            ))}
+          </DroppableZone>
+        </div>
+      </div>
+
+      <DragOverlay>
+        {activeId ? (
+          <div className="px-4 py-2 bg-blue-100 border-2 border-blue-400 rounded-lg text-base shadow-lg">
+            {activeOption?.content || activeId}
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 }

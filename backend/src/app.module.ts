@@ -31,6 +31,7 @@ import { ScormModule } from './modules/scorm/scorm.module';
 import { LearningPathsModule } from './modules/learning-paths/learning-paths.module';
 import { AssignmentsModule } from './modules/assignments/assignments.module';
 import { ContactSyncModule } from './modules/contact-sync/contact-sync.module';
+import { AiQuestionsModule } from './modules/ai-questions/ai-questions.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { ContactSyncModule } from './modules/contact-sync/contact-sync.module';
     LearningPathsModule,
     AssignmentsModule,
     ContactSyncModule,
+    AiQuestionsModule,
   ],
 })
 export class AppModule {}

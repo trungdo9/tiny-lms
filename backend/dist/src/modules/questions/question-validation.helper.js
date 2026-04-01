@@ -16,6 +16,34 @@ function validateQuestionDto(dto) {
             throw new common_1.BadRequestException('Single/True-False questions must have exactly one correct answer');
         }
     }
+    if (dto.type === 'drag_drop_text') {
+        if (!dto.content.match(/\[slot_\d+\]/)) {
+            throw new common_1.BadRequestException('drag_drop_text content must include at least one [slot_N] marker');
+        }
+        const correctTokens = dto.options?.filter(o => o.isCorrect && o.matchKey);
+        if (!correctTokens?.length) {
+            throw new common_1.BadRequestException('drag_drop_text must have at least one correct token with matchKey');
+        }
+    }
+    if (dto.type === 'drag_drop_image') {
+        if (!dto.mediaUrl) {
+            throw new common_1.BadRequestException('drag_drop_image requires a mediaUrl');
+        }
+        const zones = dto.options?.filter(o => o.isCorrect && o.matchKey && o.matchValue);
+        if (!zones?.length) {
+            throw new common_1.BadRequestException('drag_drop_image must have at least one zone with matchKey + matchValue');
+        }
+        for (const zone of zones) {
+            try {
+                const c = JSON.parse(zone.matchValue);
+                if (c.x === undefined || c.y === undefined)
+                    throw new Error();
+            }
+            catch {
+                throw new common_1.BadRequestException('Zone matchValue must be JSON { x, y, w, h }');
+            }
+        }
+    }
 }
 async function checkBankOwnership(prisma, bankId, userId, userRole) {
     const bank = await prisma.questionBank.findUnique({ where: { id: bankId } });

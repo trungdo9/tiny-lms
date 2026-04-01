@@ -27,10 +27,10 @@ let LessonActivitiesController = class LessonActivitiesController {
         return this.service.findByLesson(lessonId);
     }
     create(req, lessonId, dto) {
-        return this.service.create(req.user.id, lessonId, dto);
+        return this.service.create(req.user.id, lessonId, dto, req.user.role);
     }
     reorder(req, lessonId, body) {
-        return this.service.reorder(req.user.id, lessonId, body.activityIds);
+        return this.service.reorder(req.user.id, lessonId, body.activityIds, req.user.role);
     }
 };
 exports.LessonActivitiesController = LessonActivitiesController;
@@ -86,10 +86,10 @@ let ActivitiesController = class ActivitiesController {
         return this.service.findById(id);
     }
     update(req, id, dto) {
-        return this.service.update(req.user.id, id, dto);
+        return this.service.update(req.user.id, id, dto, req.user.role);
     }
     delete(req, id) {
-        return this.service.delete(req.user.id, id);
+        return this.service.delete(req.user.id, id, req.user.role);
     }
 };
 exports.ActivitiesController = ActivitiesController;

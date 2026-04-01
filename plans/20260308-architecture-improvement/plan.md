@@ -1,13 +1,18 @@
 # Architecture Improvement Plan
 
 **Created**: 2026-03-08
-**Status**: pending
+**Status**: Phase 1 Complete (P0 done; P1-P3 deferred)
 **Priority**: P0-P3 (phased)
 **Scope**: Schema cleanup, ORM standardization, new features
 
 ---
 
-## Phase 1: Structural Cleanup (P0 — Tech Debt)
+## Phase 1: Structural Cleanup (P0 — Tech Debt) ✅ Complete
+
+**Completed:**
+- All 5 services migrated to Prisma (CoursesService had Supabase fallback, now removed)
+- `lessonCount` denormalized field exists and syncs on lesson create/delete
+- `Quiz` and `FlashCardDeck` use `activityId` (not legacy `lessonId`)
 
 ### 1.1 Migrate Supabase → Prisma for Core Services
 
@@ -17,9 +22,9 @@
 
 | # | Service | Lines | Complexity | Notes |
 |---|---------|-------|-----------|-------|
-| 1 | `CoursesService` | 501 | HIGH | Hybrid (Supabase + Prisma). Core dependency for other services. |
-| 2 | `SectionsService` | 153 | LOW | Depends on CoursesService.canManageCourse |
-| 3 | `LessonsService` | 224 | MEDIUM | Depends on CoursesService.canManageCourse |
+| 1 | `CoursesService` | 501 | HIGH | ~~Hybrid (Supabase + Prisma)~~ → **Pure Prisma** ✅ |
+| 2 | `SectionsService` | 153 | LOW | ✅ Already Pure Prisma |
+| 3 | `LessonsService` | 224 | MEDIUM | ✅ Already Pure Prisma |
 | 4 | `EnrollmentsService` | 143 | LOW | Pure Supabase. No Prisma dependency. |
 | 5 | `ProgressService` | 160 | LOW | Pure Supabase. |
 

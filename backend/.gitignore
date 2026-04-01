@@ -4,3 +4,6 @@ node_modules
 
 /generated/prisma
 backend/dist
+
+# Uploaded images
+public/uploads

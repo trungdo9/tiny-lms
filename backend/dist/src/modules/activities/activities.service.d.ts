@@ -1,19 +1,21 @@
 import { PrismaService } from '../../common/prisma.service';
+import { CoursesService } from '../courses/courses.service';
 import { CreateActivityDto, UpdateActivityDto } from './dto/activity.dto';
 export declare class ActivitiesService {
     private prisma;
-    constructor(prisma: PrismaService);
-    create(userId: string, lessonId: string, dto: CreateActivityDto): Promise<{
+    private coursesService;
+    constructor(prisma: PrismaService, coursesService: CoursesService);
+    create(userId: string, lessonId: string, dto: CreateActivityDto, userRole?: string): Promise<{
         quiz: {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
             courseId: string;
-            isPublished: boolean;
-            availableFrom: Date | null;
             sectionId: string;
+            activityId: string;
+            description: string | null;
             timeLimitMinutes: number | null;
             maxAttempts: number | null;
             passScore: import("@prisma/client-runtime-utils").Decimal | null;
@@ -25,30 +27,30 @@ export declare class ActivitiesService {
             paginationMode: string;
             questionsPerPage: number;
             allowBackNavigation: boolean;
+            availableFrom: Date | null;
             availableUntil: Date | null;
             showLeaderboard: boolean;
-            activityId: string;
         } | null;
         flashCardDeck: {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
-            isPublished: boolean;
             activityId: string;
+            description: string | null;
             shuffleCards: boolean;
         } | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        activityType: string;
         title: string;
         orderIndex: number;
         isPublished: boolean;
-        activityType: string;
         contentUrl: string | null;
         contentType: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         lessonId: string;
     }>;
     findByLesson(lessonId: string): Promise<({
@@ -58,14 +60,14 @@ export declare class ActivitiesService {
             };
         } & {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
             courseId: string;
-            isPublished: boolean;
-            availableFrom: Date | null;
             sectionId: string;
+            activityId: string;
+            description: string | null;
             timeLimitMinutes: number | null;
             maxAttempts: number | null;
             passScore: import("@prisma/client-runtime-utils").Decimal | null;
@@ -77,9 +79,9 @@ export declare class ActivitiesService {
             paginationMode: string;
             questionsPerPage: number;
             allowBackNavigation: boolean;
+            availableFrom: Date | null;
             availableUntil: Date | null;
             showLeaderboard: boolean;
-            activityId: string;
         }) | null;
         flashCardDeck: ({
             _count: {
@@ -87,24 +89,24 @@ export declare class ActivitiesService {
             };
         } & {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
-            isPublished: boolean;
             activityId: string;
+            description: string | null;
             shuffleCards: boolean;
         }) | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        activityType: string;
         title: string;
         orderIndex: number;
         isPublished: boolean;
-        activityType: string;
         contentUrl: string | null;
         contentType: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         lessonId: string;
     })[]>;
     findById(activityId: string): Promise<{
@@ -112,27 +114,27 @@ export declare class ActivitiesService {
             questions: {
                 id: string;
                 orderIndex: number;
+                quizId: string;
+                questionId: string | null;
                 bankId: string | null;
                 pickCount: number | null;
                 difficultyFilter: string | null;
                 tagFilter: string[];
                 scoreOverride: import("@prisma/client-runtime-utils").Decimal | null;
-                quizId: string;
-                questionId: string | null;
             }[];
             _count: {
                 attempts: number;
             };
         } & {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
             courseId: string;
-            isPublished: boolean;
-            availableFrom: Date | null;
             sectionId: string;
+            activityId: string;
+            description: string | null;
             timeLimitMinutes: number | null;
             maxAttempts: number | null;
             passScore: import("@prisma/client-runtime-utils").Decimal | null;
@@ -144,58 +146,58 @@ export declare class ActivitiesService {
             paginationMode: string;
             questionsPerPage: number;
             allowBackNavigation: boolean;
+            availableFrom: Date | null;
             availableUntil: Date | null;
             showLeaderboard: boolean;
-            activityId: string;
         }) | null;
         flashCardDeck: ({
             cards: {
                 id: string;
+                orderIndex: number;
                 createdAt: Date;
                 updatedAt: Date;
-                orderIndex: number;
+                deckId: string;
                 front: string;
                 back: string;
                 hint: string | null;
                 imageUrl: string | null;
-                deckId: string;
             }[];
             _count: {
                 studySessions: number;
             };
         } & {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
-            isPublished: boolean;
             activityId: string;
+            description: string | null;
             shuffleCards: boolean;
         }) | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        activityType: string;
         title: string;
         orderIndex: number;
         isPublished: boolean;
-        activityType: string;
         contentUrl: string | null;
         contentType: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         lessonId: string;
     }>;
-    update(userId: string, activityId: string, dto: UpdateActivityDto): Promise<{
+    update(userId: string, activityId: string, dto: UpdateActivityDto, userRole?: string): Promise<{
         quiz: {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
             courseId: string;
-            isPublished: boolean;
-            availableFrom: Date | null;
             sectionId: string;
+            activityId: string;
+            description: string | null;
             timeLimitMinutes: number | null;
             maxAttempts: number | null;
             passScore: import("@prisma/client-runtime-utils").Decimal | null;
@@ -207,36 +209,36 @@ export declare class ActivitiesService {
             paginationMode: string;
             questionsPerPage: number;
             allowBackNavigation: boolean;
+            availableFrom: Date | null;
             availableUntil: Date | null;
             showLeaderboard: boolean;
-            activityId: string;
         } | null;
         flashCardDeck: {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
-            isPublished: boolean;
             activityId: string;
+            description: string | null;
             shuffleCards: boolean;
         } | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        activityType: string;
         title: string;
         orderIndex: number;
         isPublished: boolean;
-        activityType: string;
         contentUrl: string | null;
         contentType: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         lessonId: string;
     }>;
-    delete(userId: string, activityId: string): Promise<{
+    delete(userId: string, activityId: string, userRole?: string): Promise<{
         success: boolean;
     }>;
-    reorder(userId: string, lessonId: string, activityIds: string[]): Promise<{
+    reorder(userId: string, lessonId: string, activityIds: string[], userRole?: string): Promise<{
         success: boolean;
     }>;
 }

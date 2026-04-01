@@ -10,14 +10,14 @@ export declare class LessonActivitiesController {
             };
         } & {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
             courseId: string;
-            isPublished: boolean;
-            availableFrom: Date | null;
             sectionId: string;
+            activityId: string;
+            description: string | null;
             timeLimitMinutes: number | null;
             maxAttempts: number | null;
             passScore: import("@prisma/client-runtime-utils").Decimal | null;
@@ -29,9 +29,9 @@ export declare class LessonActivitiesController {
             paginationMode: string;
             questionsPerPage: number;
             allowBackNavigation: boolean;
+            availableFrom: Date | null;
             availableUntil: Date | null;
             showLeaderboard: boolean;
-            activityId: string;
         }) | null;
         flashCardDeck: ({
             _count: {
@@ -39,37 +39,37 @@ export declare class LessonActivitiesController {
             };
         } & {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
-            isPublished: boolean;
             activityId: string;
+            description: string | null;
             shuffleCards: boolean;
         }) | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        lessonId: string;
+        activityType: string;
         title: string;
         orderIndex: number;
         isPublished: boolean;
-        activityType: string;
         contentUrl: string | null;
         contentType: string | null;
-        lessonId: string;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     create(req: any, lessonId: string, dto: CreateActivityDto): Promise<{
         quiz: {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
             courseId: string;
-            isPublished: boolean;
-            availableFrom: Date | null;
             sectionId: string;
+            activityId: string;
+            description: string | null;
             timeLimitMinutes: number | null;
             maxAttempts: number | null;
             passScore: import("@prisma/client-runtime-utils").Decimal | null;
@@ -81,31 +81,31 @@ export declare class LessonActivitiesController {
             paginationMode: string;
             questionsPerPage: number;
             allowBackNavigation: boolean;
+            availableFrom: Date | null;
             availableUntil: Date | null;
             showLeaderboard: boolean;
-            activityId: string;
         } | null;
         flashCardDeck: {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
-            isPublished: boolean;
             activityId: string;
+            description: string | null;
             shuffleCards: boolean;
         } | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        lessonId: string;
+        activityType: string;
         title: string;
         orderIndex: number;
         isPublished: boolean;
-        activityType: string;
         contentUrl: string | null;
         contentType: string | null;
-        lessonId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     reorder(req: any, lessonId: string, body: ReorderActivitiesDto): Promise<{
         success: boolean;
@@ -119,27 +119,27 @@ export declare class ActivitiesController {
             questions: {
                 id: string;
                 orderIndex: number;
+                quizId: string;
+                questionId: string | null;
                 bankId: string | null;
                 pickCount: number | null;
                 difficultyFilter: string | null;
                 tagFilter: string[];
                 scoreOverride: import("@prisma/client-runtime-utils").Decimal | null;
-                quizId: string;
-                questionId: string | null;
             }[];
             _count: {
                 attempts: number;
             };
         } & {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
             courseId: string;
-            isPublished: boolean;
-            availableFrom: Date | null;
             sectionId: string;
+            activityId: string;
+            description: string | null;
             timeLimitMinutes: number | null;
             maxAttempts: number | null;
             passScore: import("@prisma/client-runtime-utils").Decimal | null;
@@ -151,58 +151,58 @@ export declare class ActivitiesController {
             paginationMode: string;
             questionsPerPage: number;
             allowBackNavigation: boolean;
+            availableFrom: Date | null;
             availableUntil: Date | null;
             showLeaderboard: boolean;
-            activityId: string;
         }) | null;
         flashCardDeck: ({
             cards: {
                 id: string;
+                orderIndex: number;
                 createdAt: Date;
                 updatedAt: Date;
-                orderIndex: number;
+                deckId: string;
                 front: string;
                 back: string;
                 hint: string | null;
                 imageUrl: string | null;
-                deckId: string;
             }[];
             _count: {
                 studySessions: number;
             };
         } & {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
-            isPublished: boolean;
             activityId: string;
+            description: string | null;
             shuffleCards: boolean;
         }) | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        lessonId: string;
+        activityType: string;
         title: string;
         orderIndex: number;
         isPublished: boolean;
-        activityType: string;
         contentUrl: string | null;
         contentType: string | null;
-        lessonId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     update(req: any, id: string, dto: UpdateActivityDto): Promise<{
         quiz: {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
             courseId: string;
-            isPublished: boolean;
-            availableFrom: Date | null;
             sectionId: string;
+            activityId: string;
+            description: string | null;
             timeLimitMinutes: number | null;
             maxAttempts: number | null;
             passScore: import("@prisma/client-runtime-utils").Decimal | null;
@@ -214,31 +214,31 @@ export declare class ActivitiesController {
             paginationMode: string;
             questionsPerPage: number;
             allowBackNavigation: boolean;
+            availableFrom: Date | null;
             availableUntil: Date | null;
             showLeaderboard: boolean;
-            activityId: string;
         } | null;
         flashCardDeck: {
             id: string;
+            title: string;
+            isPublished: boolean;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            description: string | null;
-            isPublished: boolean;
             activityId: string;
+            description: string | null;
             shuffleCards: boolean;
         } | null;
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        lessonId: string;
+        activityType: string;
         title: string;
         orderIndex: number;
         isPublished: boolean;
-        activityType: string;
         contentUrl: string | null;
         contentType: string | null;
-        lessonId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     delete(req: any, id: string): Promise<{
         success: boolean;

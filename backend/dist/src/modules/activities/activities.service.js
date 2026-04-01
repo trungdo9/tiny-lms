@@ -12,20 +12,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ActivitiesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../common/prisma.service");
+const courses_service_1 = require("../courses/courses.service");
 let ActivitiesService = class ActivitiesService {
     prisma;
-    constructor(prisma) {
+    coursesService;
+    constructor(prisma, coursesService) {
         this.prisma = prisma;
+        this.coursesService = coursesService;
     }
-    async create(userId, lessonId, dto) {
+    async create(userId, lessonId, dto, userRole = 'student') {
         const lesson = await this.prisma.lesson.findUnique({
             where: { id: lessonId },
             include: { course: true },
         });
         if (!lesson)
             throw new common_1.NotFoundException('Lesson not found');
-        if (lesson.course.instructorId !== userId) {
-            throw new common_1.ForbiddenException('You can only create activities for your own lessons');
+        if (!(await this.coursesService.canManageCourse(lesson.course.id, userId, userRole))) {
+            throw new common_1.ForbiddenException('You can only create activities for courses you are assigned to');
         }
         const activity = await this.prisma.activity.create({
             data: {
@@ -73,15 +76,15 @@ let ActivitiesService = class ActivitiesService {
             throw new common_1.NotFoundException('Activity not found');
         return activity;
     }
-    async update(userId, activityId, dto) {
+    async update(userId, activityId, dto, userRole = 'student') {
         const activity = await this.prisma.activity.findUnique({
             where: { id: activityId },
             include: { lesson: { include: { course: true } } },
         });
         if (!activity)
             throw new common_1.NotFoundException('Activity not found');
-        if (activity.lesson.course.instructorId !== userId) {
-            throw new common_1.ForbiddenException('You can only edit your own activities');
+        if (!(await this.coursesService.canManageCourse(activity.lesson.course.id, userId, userRole))) {
+            throw new common_1.ForbiddenException('You can only edit activities in courses you are assigned to');
         }
         return this.prisma.activity.update({
             where: { id: activityId },
@@ -97,15 +100,15 @@ let ActivitiesService = class ActivitiesService {
             },
         });
     }
-    async delete(userId, activityId) {
+    async delete(userId, activityId, userRole = 'student') {
         const activity = await this.prisma.activity.findUnique({
             where: { id: activityId },
             include: { lesson: { include: { course: true } } },
         });
         if (!activity)
             throw new common_1.NotFoundException('Activity not found');
-        if (activity.lesson.course.instructorId !== userId) {
-            throw new common_1.ForbiddenException('You can only delete your own activities');
+        if (!(await this.coursesService.canManageCourse(activity.lesson.course.id, userId, userRole))) {
+            throw new common_1.ForbiddenException('You can only delete activities in courses you are assigned to');
         }
         if (activity.activityType === 'quiz') {
             await this.prisma.quiz.deleteMany({ where: { activityId } });
@@ -116,15 +119,15 @@ let ActivitiesService = class ActivitiesService {
         await this.prisma.activity.delete({ where: { id: activityId } });
         return { success: true };
     }
-    async reorder(userId, lessonId, activityIds) {
+    async reorder(userId, lessonId, activityIds, userRole = 'student') {
         const lesson = await this.prisma.lesson.findUnique({
             where: { id: lessonId },
             include: { course: true },
         });
         if (!lesson)
             throw new common_1.NotFoundException('Lesson not found');
-        if (lesson.course.instructorId !== userId) {
-            throw new common_1.ForbiddenException('You can only reorder activities in your own lessons');
+        if (!(await this.coursesService.canManageCourse(lesson.course.id, userId, userRole))) {
+            throw new common_1.ForbiddenException('You can only reorder activities in courses you are assigned to');
         }
         await this.prisma.$transaction(activityIds.map((id, index) => this.prisma.activity.update({
             where: { id },
@@ -136,6 +139,7 @@ let ActivitiesService = class ActivitiesService {
 exports.ActivitiesService = ActivitiesService;
 exports.ActivitiesService = ActivitiesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        courses_service_1.CoursesService])
 ], ActivitiesService);
 //# sourceMappingURL=activities.service.js.map

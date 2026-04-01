@@ -7,8 +7,8 @@ export declare class QuestionsManagementService {
         options: {
             id: string;
             createdAt: Date;
-            orderIndex: number | null;
             content: string;
+            orderIndex: number | null;
             isCorrect: boolean;
             matchKey: string | null;
             matchValue: string | null;
@@ -19,21 +19,21 @@ export declare class QuestionsManagementService {
         createdAt: Date;
         updatedAt: Date;
         type: string;
+        difficulty: string;
+        tags: string[];
+        bankId: string;
         content: string;
         explanation: string | null;
         mediaUrl: string | null;
         mediaType: string | null;
-        difficulty: string;
         defaultScore: import("@prisma/client-runtime-utils").Decimal;
-        tags: string[];
-        bankId: string;
     }>;
     move(id: string, userId: string, userRole: string, dto: MoveQuestionDto): Promise<{
         options: {
             id: string;
             createdAt: Date;
-            orderIndex: number | null;
             content: string;
+            orderIndex: number | null;
             isCorrect: boolean;
             matchKey: string | null;
             matchValue: string | null;
@@ -44,14 +44,14 @@ export declare class QuestionsManagementService {
         createdAt: Date;
         updatedAt: Date;
         type: string;
+        difficulty: string;
+        tags: string[];
+        bankId: string;
         content: string;
         explanation: string | null;
         mediaUrl: string | null;
         mediaType: string | null;
-        difficulty: string;
         defaultScore: import("@prisma/client-runtime-utils").Decimal;
-        tags: string[];
-        bankId: string;
     }>;
     addOptions(questionId: string, userId: string, userRole: string, options: CreateOptionDto[]): Promise<import("@prisma/client").Prisma.BatchPayload>;
     updateOptions(questionId: string, userId: string, userRole: string, options: CreateOptionDto[]): Promise<import("@prisma/client").Prisma.BatchPayload>;

@@ -5,42 +5,14 @@ export declare class CoursesController {
     constructor(coursesService: CoursesService);
     findAll(query: CourseQueryDto): Promise<{
         data: {
-            instructor: any;
-            category: any;
-            lessonCount: any;
-            sectionCount: number;
-            enrollmentCount: number;
-            id: any;
-            title: any;
-            slug: any;
-            description: any;
-            thumbnail_url: any;
-            level: any;
-            status: any;
-            is_free: any;
-            price: any;
-            lesson_count: any;
-            created_at: any;
-            updated_at: any;
-            instructor_id: any;
-            category_id: any;
-        }[];
-        pagination: {
-            page: number;
-            limit: number;
-            total: number;
-            totalPages: number;
-        };
-    } | {
-        data: {
             lessonCount: number;
             sectionCount: number;
             enrollmentCount: number;
             _count: undefined;
             category: {
                 id: string;
-                name: string;
                 slug: string;
+                name: string;
             } | null;
             instructor: {
                 id: string;
@@ -48,10 +20,8 @@ export declare class CoursesController {
                 avatarUrl: string | null;
             };
             id: string;
-            slug: string;
-            createdAt: Date;
-            updatedAt: Date;
             title: string;
+            slug: string;
             description: string | null;
             thumbnailUrl: string | null;
             level: string;
@@ -60,6 +30,8 @@ export declare class CoursesController {
             price: import("@prisma/client-runtime-utils").Decimal | null;
             averageRating: number | null;
             totalReviews: number;
+            createdAt: Date;
+            updatedAt: Date;
             instructorId: string;
             categoryId: string | null;
         }[];
@@ -78,10 +50,8 @@ export declare class CoursesController {
         };
     } & {
         id: string;
-        slug: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        slug: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -91,6 +61,8 @@ export declare class CoursesController {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
+        createdAt: Date;
+        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
     })[]>;
@@ -100,14 +72,12 @@ export declare class CoursesController {
         _count: undefined;
         category: {
             id: string;
-            name: string;
             slug: string;
+            name: string;
         } | null;
         id: string;
-        slug: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        slug: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -117,71 +87,52 @@ export declare class CoursesController {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
+        createdAt: Date;
+        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
     }[]>;
-    getCategories(): Promise<{
-        id: any;
-        name: any;
-        slug: any;
-        parentId: any;
-        createdAt: any;
-        parent: any;
+    getCategories(): Promise<({
         _count: {
             courses: number;
         };
-    }[]>;
+        parent: {
+            id: string;
+            slug: string;
+            name: string;
+        } | null;
+    } & {
+        id: string;
+        slug: string;
+        createdAt: Date;
+        name: string;
+        parentId: string | null;
+    })[]>;
     getCategoryById(id: string): Promise<{
+        _count: {
+            courses: number;
+        };
         parent: {
             id: string;
             name: string;
         } | null;
         children: {
             id: string;
-            name: string;
             slug: string;
+            name: string;
         }[];
-        _count: {
-            courses: number;
-        };
     } & {
         id: string;
-        name: string;
         slug: string;
         createdAt: Date;
+        name: string;
         parentId: string | null;
     }>;
     findOne(id: string): Promise<{
-        instructor: {
-            id: any;
-            full_name: any;
-            avatar_url: any;
-        } | null;
-        category: {
-            id: any;
-            name: any;
-            slug: any;
-        } | null;
-        sections: any[];
-        id: any;
-        title: any;
-        slug: any;
-        description: any;
-        thumbnail_url: any;
-        level: any;
-        status: any;
-        is_free: any;
-        price: any;
-        lesson_count: any;
-        created_at: any;
-        updated_at: any;
-        instructor_id: any;
-        category_id: any;
-    } | ({
         category: {
             id: string;
-            name: string;
             slug: string;
+            name: string;
         } | null;
         instructor: {
             id: string;
@@ -191,11 +142,12 @@ export declare class CoursesController {
         sections: ({
             lessons: {
                 id: string;
+                title: string;
                 createdAt: Date;
                 updatedAt: Date;
-                title: string;
                 orderIndex: number;
                 courseId: string;
+                sectionId: string;
                 type: string;
                 content: string | null;
                 videoUrl: string | null;
@@ -204,24 +156,21 @@ export declare class CoursesController {
                 durationMins: number | null;
                 isPreview: boolean;
                 isPublished: boolean;
+                prerequisiteLessonId: string | null;
                 availableAfterDays: number | null;
                 availableFrom: Date | null;
-                sectionId: string;
-                prerequisiteLessonId: string | null;
             }[];
         } & {
             id: string;
-            createdAt: Date;
             title: string;
+            createdAt: Date;
             orderIndex: number;
             courseId: string;
         })[];
     } & {
         id: string;
-        slug: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        slug: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -231,15 +180,15 @@ export declare class CoursesController {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
+        createdAt: Date;
+        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
-    })>;
+    }>;
     create(dto: CreateCourseDto, req: any): Promise<{
         id: string;
-        slug: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        slug: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -249,21 +198,23 @@ export declare class CoursesController {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
+        createdAt: Date;
+        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
     }>;
     createCategory(dto: CreateCategoryDto): Promise<{
         id: string;
-        name: string;
         slug: string;
         createdAt: Date;
+        name: string;
         parentId: string | null;
     }>;
     updateCategory(id: string, dto: UpdateCategoryDto): Promise<{
         id: string;
-        name: string;
         slug: string;
         createdAt: Date;
+        name: string;
         parentId: string | null;
     }>;
     deleteCategory(id: string): Promise<{
@@ -271,10 +222,8 @@ export declare class CoursesController {
     }>;
     update(id: string, dto: UpdateCourseDto, req: any): Promise<{
         id: string;
-        slug: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        slug: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -284,6 +233,8 @@ export declare class CoursesController {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
+        createdAt: Date;
+        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
     }>;
@@ -293,10 +244,8 @@ export declare class CoursesController {
     clone(id: string, dto: CloneCourseDto, req: any): Promise<{
         message: string;
         id: string;
-        slug: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        slug: string;
         description: string | null;
         thumbnailUrl: string | null;
         level: string;
@@ -306,6 +255,8 @@ export declare class CoursesController {
         lessonCount: number;
         averageRating: number | null;
         totalReviews: number;
+        createdAt: Date;
+        updatedAt: Date;
         instructorId: string;
         categoryId: string | null;
     }>;

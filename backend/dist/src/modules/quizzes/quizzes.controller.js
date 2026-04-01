@@ -69,6 +69,9 @@ let QuizzesController = class QuizzesController {
     constructor(service) {
         this.service = service;
     }
+    findMine(req, search) {
+        return this.service.findMine(req.user.id, search);
+    }
     findAll(courseId, sectionId) {
         return this.service.findAll(courseId, sectionId);
     }
@@ -100,6 +103,17 @@ let QuizzesController = class QuizzesController {
     }
 };
 exports.QuizzesController = QuizzesController;
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'List quizzes owned by the current instructor' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of quizzes' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, common_1.Get)('mine'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], QuizzesController.prototype, "findMine", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'List quizzes, optionally filtered by courseId or sectionId' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of quizzes' }),

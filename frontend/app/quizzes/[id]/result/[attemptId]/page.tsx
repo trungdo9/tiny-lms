@@ -19,10 +19,11 @@ interface Attempt {
     question: {
       content: string;
       type: string;
+      mediaUrl?: string;
       explanation?: string;
-      options?: { id: string; content: string; isCorrect?: boolean }[];
+      options?: { id: string; content: string; isCorrect?: boolean; matchKey?: string; matchValue?: string }[];
     };
-    answer?: { selectedOptions?: string[]; textAnswer?: string };
+    answer?: { selectedOptions?: string[]; textAnswer?: string; matchAnswer?: Record<string, string> };
   }[];
 }
 
@@ -169,6 +170,64 @@ export default function QuizResultPage() {
                         <p className="p-3 bg-gray-50 rounded">{aq.answer?.textAnswer || '(No answer)'}</p>
                       </div>
                     )}
+
+                    {/* Drag Drop Text */}
+                    {aq.question.type === 'drag_drop_text' && (() => {
+                      const correctMap: Record<string, string> = {};
+                      aq.question.options?.forEach(o => {
+                        if (o.isCorrect && o.matchKey) correctMap[o.matchKey] = o.content;
+                      });
+                      const studentMap: Record<string, string> = aq.answer?.matchAnswer || {};
+                      const parts = aq.question.content.split(/(\[[^\]]+\])/);
+                      return (
+                        <div className="text-lg leading-relaxed mb-4">
+                          {parts.map((part, i) => {
+                            const m = part.match(/^\[(slot_\d+)\]$/);
+                            if (!m) return <span key={i}>{part}</span>;
+                            const slotId = m[1];
+                            const student = studentMap[slotId];
+                            const correct = correctMap[slotId];
+                            const isRight = student?.toLowerCase() === correct?.toLowerCase();
+                            return (
+                              <span key={i} className={`inline-block mx-1 px-2 py-0.5 rounded border-2 font-medium
+                                ${isRight ? 'bg-green-100 border-green-400 text-green-700'
+                                 : student  ? 'bg-red-100 border-red-400 text-red-700'
+                                 : 'bg-gray-100 border-gray-300 text-gray-400'}`}>
+                                {student || '(empty)'}
+                                {!isRight && <span className="ml-1 text-xs text-gray-500">→ {correct}</span>}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Drag Drop Image */}
+                    {aq.question.type === 'drag_drop_image' && (() => {
+                      const zones = aq.question.options?.filter(o => o.matchValue) || [];
+                      const studentMap: Record<string, string> = aq.answer?.matchAnswer || {};
+                      return (
+                        <div className="mb-4">
+                          <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
+                            <img src={aq.question.mediaUrl} className="w-full h-full object-contain" />
+                            {zones.map(zone => {
+                              let coords = { x: 0, y: 0, w: 10, h: 10 };
+                              try { if (zone.matchValue) coords = JSON.parse(zone.matchValue); } catch { /* use defaults */ }
+                              const placed = studentMap[zone.id];
+                              const isRight = placed?.toLowerCase() === zone.content.toLowerCase();
+                              return (
+                                <div key={zone.id} className={`absolute border-2 rounded flex flex-col items-center justify-center text-xs font-bold
+                                  ${isRight ? 'bg-green-200/70 border-green-500' : placed ? 'bg-red-200/70 border-red-500' : 'bg-gray-200/70 border-gray-400'}`}
+                                  style={{ left: `${coords.x}%`, top: `${coords.y}%`, width: `${coords.w}%`, height: `${coords.h}%`, transform: 'translate(-50%, -50%)' }}>
+                                  <span>{placed || '?'}</span>
+                                  {!isRight && <span className="block text-green-700 text-[10px]">{zone.content}</span>}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Explanation */}
                     {attempt.quiz.showExplanation && aq.question.explanation && (

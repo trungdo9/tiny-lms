@@ -4,10 +4,15 @@ export declare class CourseInstructorsController {
     private service;
     constructor(service: CourseInstructorsService);
     list(courseId: string): Promise<{
-        id: any;
-        role: any;
-        addedAt: any;
-        profile: any;
+        id: string;
+        role: string;
+        addedAt: Date;
+        profile: {
+            id: string;
+            email: string | null;
+            fullName: string | null;
+            avatarUrl: string | null;
+        };
     }[]>;
     assign(courseId: string, dto: AssignInstructorDto, req: any): Promise<{
         profile: {
@@ -18,9 +23,9 @@ export declare class CourseInstructorsController {
         };
     } & {
         id: string;
-        role: string;
         courseId: string;
         profileId: string;
+        role: string;
         addedAt: Date;
         addedBy: string;
     }>;
@@ -36,9 +41,9 @@ export declare class CourseInstructorsController {
         };
     } & {
         id: string;
-        role: string;
         courseId: string;
         profileId: string;
+        role: string;
         addedAt: Date;
         addedBy: string;
     }>;

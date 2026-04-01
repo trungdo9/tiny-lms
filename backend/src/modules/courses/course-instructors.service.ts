@@ -6,79 +6,25 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
-import { SupabaseService } from '../../common/supabase.service';
 import { AssignInstructorDto, UpdateInstructorRoleDto } from './dto/course-instructor.dto';
 
 @Injectable()
 export class CourseInstructorsService {
-  constructor(
-    private prisma: PrismaService,
-    private supabaseService: SupabaseService,
-  ) {}
-
-  private shouldUseSupabaseFallback(error: any) {
-    return ['ENETUNREACH', 'P1001'].includes(error?.code)
-      || /ENETUNREACH|Can't reach database server|connect ENETUNREACH/i.test(String(error?.message || ''));
-  }
+  constructor(private prisma: PrismaService) {}
 
   async list(courseId: string) {
-    try {
-      const rows = await this.prisma.courseInstructor.findMany({
-        where: { courseId },
-        select: {
-          id: true,
-          role: true,
-          addedAt: true,
-          profile: {
-            select: { id: true, email: true, fullName: true, avatarUrl: true },
-          },
+    return this.prisma.courseInstructor.findMany({
+      where: { courseId },
+      select: {
+        id: true,
+        role: true,
+        addedAt: true,
+        profile: {
+          select: { id: true, email: true, fullName: true, avatarUrl: true },
         },
-        orderBy: [{ role: 'desc' }, { addedAt: 'asc' }], // 'primary' > 'co_instructor' alphabetically desc
-      });
-      return rows;
-    } catch (error) {
-      if (!this.shouldUseSupabaseFallback(error)) throw error;
-
-      const { data: instructors, error: instructorsError } = await this.supabaseService.adminClient
-        .from('course_instructors')
-        .select('id,role,added_at,profile_id')
-        .eq('course_id', courseId)
-        .order('role', { ascending: false })
-        .order('added_at', { ascending: true });
-
-      if (instructorsError) throw instructorsError;
-
-      const profileIds = [...new Set((instructors || []).map((row) => row.profile_id).filter(Boolean))];
-      const { data: profiles, error: profilesError } = profileIds.length
-        ? await this.supabaseService.adminClient
-            .from('profiles')
-            .select('id,email,full_name,avatar_url')
-            .in('id', profileIds)
-        : { data: [], error: null };
-
-      if (profilesError) throw profilesError;
-
-      const profileMap = new Map<string, any>(
-        (profiles || []).map(
-          (profile: any) => [
-            profile.id,
-            {
-              id: profile.id,
-              email: profile.email,
-              fullName: profile.full_name,
-              avatarUrl: profile.avatar_url,
-            },
-          ] as [string, any],
-        ),
-      );
-
-      return (instructors || []).map((row) => ({
-        id: row.id,
-        role: row.role,
-        addedAt: row.added_at,
-        profile: row.profile_id ? profileMap.get(row.profile_id) || null : null,
-      }));
-    }
+      },
+      orderBy: [{ role: 'desc' }, { addedAt: 'asc' }],
+    });
   }
 
   async assign(courseId: string, dto: AssignInstructorDto, actorId: string, actorRole: string) {

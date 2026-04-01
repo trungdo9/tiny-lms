@@ -5,6 +5,9 @@
 
 export const TEST_USER_EMAIL = 'claw.student+regression@example.com';
 export const TEST_USER_PASSWORD = 'ClawStudent!2026';
+
+export const ADMIN_EMAIL = 'admin.1774999620341.h54b25@example.com';
+export const ADMIN_PASSWORD = 'AdminPass123!';
 export const REGRESSION_COURSE_SLUG = 'regression-smoke-course-20260321080343';
 export const REGRESSION_COURSE_ID = '9e778ad8-500e-405a-b963-7ac87e563984';
 export const REGRESSION_LESSON_ID = '6d9a9ec4-a4bf-4b9b-b4a9-73dd31eb9a96';

@@ -5,25 +5,27 @@ export declare class QuestionsController {
     private service;
     private management;
     constructor(service: QuestionsService, management: QuestionsManagementService);
+    uploadImage(file: Express.Multer.File): {
+        url: string;
+    };
     findAll(bankId: string, req: any, query: ListQuestionsQueryDto): Promise<{
         data: ({
             options: {
                 id: string;
+                content: string;
                 createdAt: Date;
                 orderIndex: number | null;
-                content: string;
+                questionId: string;
                 isCorrect: boolean;
                 matchKey: string | null;
                 matchValue: string | null;
-                questionId: string;
             }[];
             _count: {
                 quizQuestions: number;
             };
         } & {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
+            bankId: string;
             type: string;
             content: string;
             explanation: string | null;
@@ -32,7 +34,8 @@ export declare class QuestionsController {
             difficulty: string;
             defaultScore: import("@prisma/client-runtime-utils").Decimal;
             tags: string[];
-            bankId: string;
+            createdAt: Date;
+            updatedAt: Date;
         })[];
         meta: {
             total: number;
@@ -44,20 +47,19 @@ export declare class QuestionsController {
     findOne(id: string, req: any): Promise<{
         options: {
             id: string;
+            content: string;
             createdAt: Date;
             orderIndex: number | null;
-            content: string;
+            questionId: string;
             isCorrect: boolean;
             matchKey: string | null;
             matchValue: string | null;
-            questionId: string;
         }[];
         _count: {
             quizQuestions: number;
         };
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        bankId: string;
         type: string;
         content: string;
         explanation: string | null;
@@ -66,23 +68,23 @@ export declare class QuestionsController {
         difficulty: string;
         defaultScore: import("@prisma/client-runtime-utils").Decimal;
         tags: string[];
-        bankId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     create(bankId: string, req: any, dto: CreateQuestionDto): Promise<{
         options: {
             id: string;
+            content: string;
             createdAt: Date;
             orderIndex: number | null;
-            content: string;
+            questionId: string;
             isCorrect: boolean;
             matchKey: string | null;
             matchValue: string | null;
-            questionId: string;
         }[];
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        bankId: string;
         type: string;
         content: string;
         explanation: string | null;
@@ -91,14 +93,14 @@ export declare class QuestionsController {
         difficulty: string;
         defaultScore: import("@prisma/client-runtime-utils").Decimal;
         tags: string[];
-        bankId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     bulkCreate(bankId: string, req: any, dto: BulkCreateQuestionDto): Promise<{
         count: number;
         questions: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
+            bankId: string;
             type: string;
             content: string;
             explanation: string | null;
@@ -107,24 +109,24 @@ export declare class QuestionsController {
             difficulty: string;
             defaultScore: import("@prisma/client-runtime-utils").Decimal;
             tags: string[];
-            bankId: string;
+            createdAt: Date;
+            updatedAt: Date;
         }[];
     }>;
     update(id: string, req: any, dto: UpdateQuestionDto): Promise<{
         options: {
             id: string;
+            content: string;
             createdAt: Date;
             orderIndex: number | null;
-            content: string;
+            questionId: string;
             isCorrect: boolean;
             matchKey: string | null;
             matchValue: string | null;
-            questionId: string;
         }[];
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        bankId: string;
         type: string;
         content: string;
         explanation: string | null;
@@ -133,7 +135,8 @@ export declare class QuestionsController {
         difficulty: string;
         defaultScore: import("@prisma/client-runtime-utils").Decimal;
         tags: string[];
-        bankId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     delete(id: string, req: any): Promise<{
         success: boolean;
@@ -141,18 +144,17 @@ export declare class QuestionsController {
     clone(id: string, req: any, dto: CloneQuestionDto): Promise<{
         options: {
             id: string;
+            content: string;
             createdAt: Date;
             orderIndex: number | null;
-            content: string;
+            questionId: string;
             isCorrect: boolean;
             matchKey: string | null;
             matchValue: string | null;
-            questionId: string;
         }[];
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        bankId: string;
         type: string;
         content: string;
         explanation: string | null;
@@ -161,23 +163,23 @@ export declare class QuestionsController {
         difficulty: string;
         defaultScore: import("@prisma/client-runtime-utils").Decimal;
         tags: string[];
-        bankId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     move(id: string, req: any, dto: MoveQuestionDto): Promise<{
         options: {
             id: string;
+            content: string;
             createdAt: Date;
             orderIndex: number | null;
-            content: string;
+            questionId: string;
             isCorrect: boolean;
             matchKey: string | null;
             matchValue: string | null;
-            questionId: string;
         }[];
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        bankId: string;
         type: string;
         content: string;
         explanation: string | null;
@@ -186,7 +188,8 @@ export declare class QuestionsController {
         difficulty: string;
         defaultScore: import("@prisma/client-runtime-utils").Decimal;
         tags: string[];
-        bankId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     addOptions(id: string, req: any, options: CreateOptionDto[]): Promise<import("@prisma/client").Prisma.BatchPayload>;
     updateOptions(id: string, req: any, options: CreateOptionDto[]): Promise<import("@prisma/client").Prisma.BatchPayload>;

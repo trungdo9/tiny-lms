@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { CANONICAL_QUESTION_DIFFICULTIES } from '../question-difficulty.util';
 
-export const VALID_QUESTION_TYPES = ['single', 'multi', 'true_false', 'short_answer', 'essay', 'matching', 'ordering', 'cloze'];
+export const VALID_QUESTION_TYPES = ['single', 'multi', 'true_false', 'short_answer', 'essay', 'matching', 'ordering', 'cloze', 'drag_drop_text', 'drag_drop_image'];
 export const VALID_DIFFICULTIES = [...CANONICAL_QUESTION_DIFFICULTIES];
 
 export class CreateOptionDto {

@@ -76,6 +76,7 @@ const scorm_module_1 = require("./modules/scorm/scorm.module");
 const learning_paths_module_1 = require("./modules/learning-paths/learning-paths.module");
 const assignments_module_1 = require("./modules/assignments/assignments.module");
 const contact_sync_module_1 = require("./modules/contact-sync/contact-sync.module");
+const ai_questions_module_1 = require("./modules/ai-questions/ai-questions.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -118,6 +119,7 @@ exports.AppModule = AppModule = __decorate([
             learning_paths_module_1.LearningPathsModule,
             assignments_module_1.AssignmentsModule,
             contact_sync_module_1.ContactSyncModule,
+            ai_questions_module_1.AiQuestionsModule,
         ],
     })
 ], AppModule);

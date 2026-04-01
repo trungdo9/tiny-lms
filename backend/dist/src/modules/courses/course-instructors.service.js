@@ -12,70 +12,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CourseInstructorsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../common/prisma.service");
-const supabase_service_1 = require("../../common/supabase.service");
 let CourseInstructorsService = class CourseInstructorsService {
     prisma;
-    supabaseService;
-    constructor(prisma, supabaseService) {
+    constructor(prisma) {
         this.prisma = prisma;
-        this.supabaseService = supabaseService;
-    }
-    shouldUseSupabaseFallback(error) {
-        return ['ENETUNREACH', 'P1001'].includes(error?.code)
-            || /ENETUNREACH|Can't reach database server|connect ENETUNREACH/i.test(String(error?.message || ''));
     }
     async list(courseId) {
-        try {
-            const rows = await this.prisma.courseInstructor.findMany({
-                where: { courseId },
-                select: {
-                    id: true,
-                    role: true,
-                    addedAt: true,
-                    profile: {
-                        select: { id: true, email: true, fullName: true, avatarUrl: true },
-                    },
+        return this.prisma.courseInstructor.findMany({
+            where: { courseId },
+            select: {
+                id: true,
+                role: true,
+                addedAt: true,
+                profile: {
+                    select: { id: true, email: true, fullName: true, avatarUrl: true },
                 },
-                orderBy: [{ role: 'desc' }, { addedAt: 'asc' }],
-            });
-            return rows;
-        }
-        catch (error) {
-            if (!this.shouldUseSupabaseFallback(error))
-                throw error;
-            const { data: instructors, error: instructorsError } = await this.supabaseService.adminClient
-                .from('course_instructors')
-                .select('id,role,added_at,profile_id')
-                .eq('course_id', courseId)
-                .order('role', { ascending: false })
-                .order('added_at', { ascending: true });
-            if (instructorsError)
-                throw instructorsError;
-            const profileIds = [...new Set((instructors || []).map((row) => row.profile_id).filter(Boolean))];
-            const { data: profiles, error: profilesError } = profileIds.length
-                ? await this.supabaseService.adminClient
-                    .from('profiles')
-                    .select('id,email,full_name,avatar_url')
-                    .in('id', profileIds)
-                : { data: [], error: null };
-            if (profilesError)
-                throw profilesError;
-            const profileMap = new Map((profiles || []).map((profile) => [
-                profile.id,
-                {
-                    id: profile.id,
-                    email: profile.email,
-                    fullName: profile.full_name,
-                    avatarUrl: profile.avatar_url,
-                },
-            ]));
-            return (instructors || []).map((row) => ({
-                id: row.id,
-                role: row.role,
-                addedAt: row.added_at,
-                profile: row.profile_id ? profileMap.get(row.profile_id) || null : null,
-            }));
-        }
+            },
+            orderBy: [{ role: 'desc' }, { addedAt: 'asc' }],
+        });
     }
     async assign(courseId, dto, actorId, actorRole) {
         if (actorRole !== 'admin') {
@@ -152,7 +106,6 @@ let CourseInstructorsService = class CourseInstructorsService {
 exports.CourseInstructorsService = CourseInstructorsService;
 exports.CourseInstructorsService = CourseInstructorsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        supabase_service_1.SupabaseService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], CourseInstructorsService);
 //# sourceMappingURL=course-instructors.service.js.map

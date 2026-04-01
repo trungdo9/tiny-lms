@@ -8,11 +8,12 @@ export declare class SectionsService {
     findByCourse(courseId: string): Promise<({
         lessons: {
             id: string;
+            title: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
             orderIndex: number;
             courseId: string;
+            sectionId: string;
             type: string;
             content: string | null;
             videoUrl: string | null;
@@ -21,26 +22,26 @@ export declare class SectionsService {
             durationMins: number | null;
             isPreview: boolean;
             isPublished: boolean;
+            prerequisiteLessonId: string | null;
             availableAfterDays: number | null;
             availableFrom: Date | null;
-            sectionId: string;
-            prerequisiteLessonId: string | null;
         }[];
     } & {
         id: string;
-        createdAt: Date;
         title: string;
+        createdAt: Date;
         orderIndex: number;
         courseId: string;
     })[]>;
     findOne(id: string): Promise<{
         lessons: {
             id: string;
+            title: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
             orderIndex: number;
             courseId: string;
+            sectionId: string;
             type: string;
             content: string | null;
             videoUrl: string | null;
@@ -49,29 +50,28 @@ export declare class SectionsService {
             durationMins: number | null;
             isPreview: boolean;
             isPublished: boolean;
+            prerequisiteLessonId: string | null;
             availableAfterDays: number | null;
             availableFrom: Date | null;
-            sectionId: string;
-            prerequisiteLessonId: string | null;
         }[];
     } & {
         id: string;
-        createdAt: Date;
         title: string;
+        createdAt: Date;
         orderIndex: number;
         courseId: string;
     }>;
     create(courseId: string, dto: CreateSectionDto, userId: string, userRole?: string): Promise<{
         id: string;
-        createdAt: Date;
         title: string;
+        createdAt: Date;
         orderIndex: number;
         courseId: string;
     }>;
     update(id: string, dto: UpdateSectionDto, userId: string, userRole?: string): Promise<{
         id: string;
-        createdAt: Date;
         title: string;
+        createdAt: Date;
         orderIndex: number;
         courseId: string;
     }>;

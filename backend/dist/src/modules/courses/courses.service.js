@@ -12,142 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoursesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../common/prisma.service");
-const supabase_service_1 = require("../../common/supabase.service");
 let CoursesService = class CoursesService {
     prisma;
-    supabaseService;
-    constructor(prisma, supabaseService) {
+    constructor(prisma) {
         this.prisma = prisma;
-        this.supabaseService = supabaseService;
-    }
-    shouldUseSupabaseFallback(error) {
-        return ['ENETUNREACH', 'P1001'].includes(error?.code) || /ENETUNREACH|Can't reach database server|connect ENETUNREACH/i.test(String(error?.message || ''));
-    }
-    async getPublicCoursesFromSupabase(query) {
-        const page = query.page || 1;
-        const limit = query.limit || 10;
-        const from = (page - 1) * limit;
-        const to = from + limit - 1;
-        let courseQuery = this.supabaseService.adminClient
-            .from('courses')
-            .select('id,title,slug,description,thumbnail_url,level,status,is_free,price,lesson_count,created_at,updated_at,instructor_id,category_id', { count: 'exact' })
-            .eq('status', query.status || 'published')
-            .order('created_at', { ascending: false })
-            .range(from, to);
-        if (query.search)
-            courseQuery = courseQuery.ilike('title', `%${query.search}%`);
-        if (query.categoryId)
-            courseQuery = courseQuery.eq('category_id', query.categoryId);
-        if (query.level)
-            courseQuery = courseQuery.eq('level', query.level);
-        if (query.isFree !== undefined)
-            courseQuery = courseQuery.eq('is_free', query.isFree);
-        const { data: courses, error, count } = await courseQuery;
-        if (error)
-            throw error;
-        const instructorIds = [...new Set((courses || []).map((course) => course.instructor_id).filter(Boolean))];
-        const categoryIds = [...new Set((courses || []).map((course) => course.category_id).filter(Boolean))];
-        const [{ data: instructors, error: instructorsError }, { data: categories, error: categoriesError }] = await Promise.all([
-            instructorIds.length
-                ? this.supabaseService.adminClient.from('profiles').select('id,full_name,avatar_url').in('id', instructorIds)
-                : Promise.resolve({ data: [], error: null }),
-            categoryIds.length
-                ? this.supabaseService.adminClient.from('categories').select('id,name,slug').in('id', categoryIds)
-                : Promise.resolve({ data: [], error: null }),
-        ]);
-        if (instructorsError)
-            throw instructorsError;
-        if (categoriesError)
-            throw categoriesError;
-        const instructorMap = new Map((instructors || []).map((item) => [item.id, item]));
-        const categoryMap = new Map((categories || []).map((item) => [item.id, item]));
-        return {
-            data: (courses || []).map((course) => ({
-                ...course,
-                instructor: course.instructor_id ? instructorMap.get(course.instructor_id) || null : null,
-                category: course.category_id ? categoryMap.get(course.category_id) || null : null,
-                lessonCount: course.lesson_count || 0,
-                sectionCount: 0,
-                enrollmentCount: 0,
-            })),
-            pagination: {
-                page,
-                limit,
-                total: count || 0,
-                totalPages: Math.ceil((count || 0) / limit),
-            },
-        };
-    }
-    async getPublicCourseDetailFromSupabase(identifier) {
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(identifier);
-        const courseQuery = this.supabaseService.adminClient
-            .from('courses')
-            .select('id,title,slug,description,thumbnail_url,level,status,is_free,price,lesson_count,created_at,updated_at,instructor_id,category_id')[isUuid ? 'eq' : 'ilike'](isUuid ? 'id' : 'slug', identifier)
-            .limit(1)
-            .maybeSingle();
-        const { data: course, error } = await courseQuery;
-        if (error)
-            throw error;
-        if (!course)
-            throw new common_1.NotFoundException('Course not found');
-        const [{ data: instructor, error: instructorError }, { data: category, error: categoryError }, { data: sections, error: sectionsError }, { data: lessons, error: lessonsError }] = await Promise.all([
-            course.instructor_id
-                ? this.supabaseService.adminClient.from('profiles').select('id,full_name,avatar_url').eq('id', course.instructor_id).maybeSingle()
-                : Promise.resolve({ data: null, error: null }),
-            course.category_id
-                ? this.supabaseService.adminClient.from('categories').select('id,name,slug').eq('id', course.category_id).maybeSingle()
-                : Promise.resolve({ data: null, error: null }),
-            this.supabaseService.adminClient.from('sections').select('id,title,order_index,course_id').eq('course_id', course.id).order('order_index', { ascending: true }),
-            this.supabaseService.adminClient.from('lessons').select('id,title,type,duration_mins,is_preview,is_published,order_index,section_id,course_id').eq('course_id', course.id).order('order_index', { ascending: true }),
-        ]);
-        if (instructorError)
-            throw instructorError;
-        if (categoryError)
-            throw categoryError;
-        if (sectionsError)
-            throw sectionsError;
-        if (lessonsError)
-            throw lessonsError;
-        const lessonsBySection = (lessons || []).reduce((acc, lesson) => {
-            if (!lesson.section_id)
-                return acc;
-            acc[lesson.section_id] = acc[lesson.section_id] || [];
-            acc[lesson.section_id].push(lesson);
-            return acc;
-        }, {});
-        return {
-            ...course,
-            instructor,
-            category,
-            sections: (sections || []).map((section) => ({
-                ...section,
-                lessons: (lessonsBySection[section.id] || []).sort((a, b) => a.order_index - b.order_index),
-            })),
-        };
-    }
-    async getPublicCategoriesFromSupabase() {
-        const [{ data: categories, error: categoriesError }, { data: courses, error: coursesError }] = await Promise.all([
-            this.supabaseService.adminClient.from('categories').select('id,name,slug,parent_id,created_at').order('name', { ascending: true }),
-            this.supabaseService.adminClient.from('courses').select('category_id').not('category_id', 'is', null),
-        ]);
-        if (categoriesError)
-            throw categoriesError;
-        if (coursesError)
-            throw coursesError;
-        const courseCounts = (courses || []).reduce((acc, course) => {
-            acc[course.category_id] = (acc[course.category_id] || 0) + 1;
-            return acc;
-        }, {});
-        const categoryMap = new Map((categories || []).map((item) => [item.id, item]));
-        return (categories || []).map((category) => ({
-            id: category.id,
-            name: category.name,
-            slug: category.slug,
-            parentId: category.parent_id,
-            createdAt: category.created_at,
-            parent: category.parent_id ? categoryMap.get(category.parent_id) || null : null,
-            _count: { courses: courseCounts[category.id] || 0 },
-        }));
     }
     async canManageCourse(courseId, userId, userRole) {
         if (userRole === 'admin')
@@ -202,69 +70,55 @@ let CoursesService = class CoursesService {
         }
         const page = query.page || 1;
         const limit = query.limit || 10;
-        try {
-            const [courses, total] = await Promise.all([
-                this.prisma.course.findMany({
-                    where,
-                    include: {
-                        instructor: { select: { id: true, fullName: true, avatarUrl: true } },
-                        category: { select: { id: true, name: true, slug: true } },
-                        _count: { select: { sections: true, lessons: true, enrollments: true } },
-                    },
-                    orderBy: { createdAt: 'desc' },
-                    skip: (page - 1) * limit,
-                    take: limit,
-                }),
-                this.prisma.course.count({ where }),
-            ]);
-            return {
-                data: courses.map((course) => ({
-                    ...course,
-                    lessonCount: course._count.lessons,
-                    sectionCount: course._count.sections,
-                    enrollmentCount: course._count.enrollments,
-                    _count: undefined,
-                })),
-                pagination: {
-                    page,
-                    limit,
-                    total,
-                    totalPages: Math.ceil(total / limit),
-                },
-            };
-        }
-        catch (error) {
-            if (!this.shouldUseSupabaseFallback(error))
-                throw error;
-            return this.getPublicCoursesFromSupabase(query);
-        }
-    }
-    async findOne(idOrSlug) {
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);
-        try {
-            const course = await this.prisma.course.findFirst({
-                where: isUuid ? { id: idOrSlug } : { slug: idOrSlug },
+        const [courses, total] = await Promise.all([
+            this.prisma.course.findMany({
+                where,
                 include: {
                     instructor: { select: { id: true, fullName: true, avatarUrl: true } },
                     category: { select: { id: true, name: true, slug: true } },
-                    sections: {
-                        include: {
-                            lessons: { orderBy: { orderIndex: 'asc' } },
-                        },
-                        orderBy: { orderIndex: 'asc' },
-                    },
+                    _count: { select: { sections: true, lessons: true, enrollments: true } },
                 },
-            });
-            if (!course) {
-                throw new common_1.NotFoundException('Course not found');
-            }
-            return course;
+                orderBy: { createdAt: 'desc' },
+                skip: (page - 1) * limit,
+                take: limit,
+            }),
+            this.prisma.course.count({ where }),
+        ]);
+        return {
+            data: courses.map((course) => ({
+                ...course,
+                lessonCount: course._count.lessons,
+                sectionCount: course._count.sections,
+                enrollmentCount: course._count.enrollments,
+                _count: undefined,
+            })),
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
+    }
+    async findOne(idOrSlug) {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);
+        const course = await this.prisma.course.findFirst({
+            where: isUuid ? { id: idOrSlug } : { slug: idOrSlug },
+            include: {
+                instructor: { select: { id: true, fullName: true, avatarUrl: true } },
+                category: { select: { id: true, name: true, slug: true } },
+                sections: {
+                    include: {
+                        lessons: { orderBy: { orderIndex: 'asc' } },
+                    },
+                    orderBy: { orderIndex: 'asc' },
+                },
+            },
+        });
+        if (!course) {
+            throw new common_1.NotFoundException('Course not found');
         }
-        catch (error) {
-            if (!this.shouldUseSupabaseFallback(error))
-                throw error;
-            return this.getPublicCourseDetailFromSupabase(idOrSlug);
-        }
+        return course;
     }
     async findMyCourses(userId) {
         return this.prisma.course.findMany({
@@ -354,20 +208,13 @@ let CoursesService = class CoursesService {
         return { success: true };
     }
     async getCategories() {
-        try {
-            return await this.prisma.category.findMany({
-                orderBy: { name: 'asc' },
-                include: {
-                    _count: { select: { courses: true } },
-                    parent: { select: { id: true, name: true, slug: true } },
-                },
-            });
-        }
-        catch (error) {
-            if (!this.shouldUseSupabaseFallback(error))
-                throw error;
-            return this.getPublicCategoriesFromSupabase();
-        }
+        return this.prisma.category.findMany({
+            orderBy: { name: 'asc' },
+            include: {
+                _count: { select: { courses: true } },
+                parent: { select: { id: true, name: true, slug: true } },
+            },
+        });
     }
     async getCategoryById(id) {
         const cat = await this.prisma.category.findUnique({
@@ -621,7 +468,6 @@ let CoursesService = class CoursesService {
 exports.CoursesService = CoursesService;
 exports.CoursesService = CoursesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        supabase_service_1.SupabaseService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], CoursesService);
 //# sourceMappingURL=courses.service.js.map

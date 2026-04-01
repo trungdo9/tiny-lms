@@ -26,6 +26,14 @@ async function bootstrap() {
     }),
   );
 
+  // Serve uploaded images
+  app.use(
+    '/uploads/images',
+    express.static(path.join(process.cwd(), 'public', 'uploads', 'images'), {
+      index: false,
+    }),
+  );
+
   // Enable CORS for frontend, including LAN/dev origins
   app.enableCors({
     origin: (origin, callback) => {
