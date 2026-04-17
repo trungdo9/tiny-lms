@@ -3,6 +3,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  closestCenter,
+  pointerWithin,
+} from '@dnd-kit/core';
 import { supabase } from '@/lib/supabase';
 import { queryKeys } from '@/lib/query-keys';
 
@@ -26,6 +37,7 @@ interface Question {
   question: {
     content: string;
     type: string;
+    mediaUrl?: string;
     explanation?: string;
     options?: QuestionOption[];
   };
@@ -537,6 +549,26 @@ export default function QuizAttemptPage() {
                   onChange={(textAnswer) => handleAnswerChange(q.questionId, 'textAnswer', textAnswer)}
                 />
               )}
+
+              {/* Drag-Drop Text */}
+              {q.question.type === 'drag_drop_text' && (
+                <DragDropTextInput
+                  content={q.question.content}
+                  options={q.question.options || []}
+                  answer={(q.answer?.matchAnswer as Record<string, string>) || {}}
+                  onChange={(val) => handleAnswerChange(q.questionId, 'matchAnswer', val)}
+                />
+              )}
+
+              {/* Drag-Drop Image */}
+              {q.question.type === 'drag_drop_image' && (
+                <DragDropImageInput
+                  mediaUrl={q.question.mediaUrl || ''}
+                  options={q.question.options || []}
+                  answer={(q.answer?.matchAnswer as Record<string, string>) || {}}
+                  onChange={(val) => handleAnswerChange(q.questionId, 'matchAnswer', val)}
+                />
+              )}
             </div>
           ))}
 
@@ -640,6 +672,243 @@ export default function QuizAttemptPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// DragDropText — draggable token chip
+function DraggableToken({ id, content, dimmed }: { id: string; content: string; dimmed?: boolean }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+  return (
+    <span
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className={`inline-block px-3 py-1 border-2 border-black bg-white font-medium text-sm rounded cursor-grab select-none transition-opacity ${
+        isDragging ? 'opacity-0' : dimmed ? 'opacity-40' : 'opacity-100'
+      }`}
+    >
+      {content}
+    </span>
+  );
+}
+
+// DragDropText — droppable slot
+function DroppableSlot({ id, placed }: { id: string; placed?: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <span
+      ref={setNodeRef}
+      className={`inline-block min-w-[80px] mx-1 px-3 py-1 border-b-2 align-middle text-center text-sm font-medium transition-colors ${
+        placed
+          ? 'border-blue-500 bg-blue-50 text-blue-800'
+          : isOver
+          ? 'border-blue-400 bg-blue-50'
+          : 'border-gray-400 bg-gray-50 text-gray-400'
+      }`}
+    >
+      {placed || '　'}
+    </span>
+  );
+}
+
+// DragDropText — word bank drop target (to return tokens)
+function DroppableBank({ children }: { children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id: '__bank__' });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex flex-wrap gap-2 p-3 border-2 border-dashed rounded-lg min-h-[48px] transition-colors ${
+        isOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-gray-50'
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DragDropTextInput({
+  content,
+  options,
+  answer,
+  onChange,
+}: {
+  content: string;
+  options: QuestionOption[];
+  answer: Record<string, string>;
+  onChange: (answer: Record<string, string>) => void;
+}) {
+  const sensors = useSensors(useSensor(PointerSensor));
+  const [activeContent, setActiveContent] = useState<string | null>(null);
+
+  const parts = content.split(/(\[slot_\d+\])/);
+  const placedSet = new Set(Object.values(answer));
+
+  const handleDragStart = (event: any) => {
+    const opt = options.find((o) => o.id === event.active.id);
+    setActiveContent(opt?.content ?? null);
+  };
+
+  const handleDragEnd = (event: any) => {
+    setActiveContent(null);
+    const { active, over } = event;
+    if (!over) return;
+    const opt = options.find((o) => o.id === active.id);
+    if (!opt) return;
+
+    if (over.id === '__bank__') {
+      // Remove token from wherever it was placed
+      const updated = { ...answer };
+      for (const [slot, val] of Object.entries(updated)) {
+        if (val === opt.content) delete updated[slot];
+      }
+      onChange(updated);
+    } else {
+      // Place token in slot (over.id is slot string like "slot_0")
+      onChange({ ...answer, [over.id as string]: opt.content });
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-gray-500">Drag words into the correct slots.</p>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="text-lg leading-loose">
+          {parts.map((part, i) => {
+            const m = part.match(/^\[slot_(\d+)\]$/);
+            if (m) {
+              const slotId = `slot_${m[1]}`;
+              return <DroppableSlot key={i} id={slotId} placed={answer[slotId]} />;
+            }
+            return <span key={i}>{part}</span>;
+          })}
+        </div>
+        <div>
+          <p className="text-sm text-gray-500 mb-2">Word bank:</p>
+          <DroppableBank>
+            {options.map((opt) => (
+              <DraggableToken key={opt.id} id={opt.id} content={opt.content} dimmed={placedSet.has(opt.content)} />
+            ))}
+          </DroppableBank>
+        </div>
+        <DragOverlay>
+          {activeContent && (
+            <span className="inline-block px-3 py-1 border-2 border-black bg-yellow-100 font-medium text-sm rounded shadow-lg cursor-grabbing">
+              {activeContent}
+            </span>
+          )}
+        </DragOverlay>
+      </DndContext>
+    </div>
+  );
+}
+
+// DragDropImage — draggable label chip
+function DraggableLabel({ id, content }: { id: string; content: string }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+  return (
+    <span
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className={`inline-block px-3 py-1 border-2 border-black bg-white font-medium text-sm rounded cursor-grab select-none transition-opacity ${
+        isDragging ? 'opacity-0' : 'opacity-100'
+      }`}
+    >
+      {content}
+    </span>
+  );
+}
+
+// DragDropImage — droppable zone overlay
+function DroppableZone({ id, coords, placed }: { id: string; coords: { x: number; y: number; w: number; h: number }; placed?: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        position: 'absolute',
+        left: `${coords.x}%`,
+        top: `${coords.y}%`,
+        width: `${coords.w}%`,
+        height: `${coords.h}%`,
+        transform: 'translate(-50%, -50%)',
+      }}
+      className={`flex items-center justify-center border-2 border-dashed text-xs font-medium transition-colors ${
+        placed
+          ? 'border-blue-500 bg-blue-500/20 text-blue-900'
+          : isOver
+          ? 'border-blue-400 bg-blue-400/20'
+          : 'border-white/70 bg-black/10 text-white'
+      }`}
+    >
+      {placed || 'Drop here'}
+    </div>
+  );
+}
+
+function DragDropImageInput({
+  mediaUrl,
+  options,
+  answer,
+  onChange,
+}: {
+  mediaUrl: string;
+  options: QuestionOption[];
+  answer: Record<string, string>;
+  onChange: (answer: Record<string, string>) => void;
+}) {
+  const sensors = useSensors(useSensor(PointerSensor));
+  const [activeContent, setActiveContent] = useState<string | null>(null);
+
+  const zones = options.filter((o) => o.matchValue != null && o.matchValue !== '');
+  const distractors = options.filter((o) => o.matchValue == null || o.matchValue === '');
+  const placedSet = new Set(Object.values(answer));
+
+  const handleDragStart = (event: any) => {
+    const opt = options.find((o) => o.id === event.active.id);
+    setActiveContent(opt?.content ?? null);
+  };
+
+  const handleDragEnd = (event: any) => {
+    setActiveContent(null);
+    const { active, over } = event;
+    if (!over || over.id === '__label_bank__') return;
+    const opt = options.find((o) => o.id === active.id);
+    if (!opt) return;
+    onChange({ ...answer, [over.id as string]: opt.content });
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-gray-500">Drag labels onto the correct zones in the image.</p>
+      <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
+          <img src={mediaUrl} alt="Question image" className="w-full h-full object-contain bg-black" />
+          {zones.map((zone) => {
+            let coords = { x: 50, y: 50, w: 15, h: 10 };
+            try { coords = JSON.parse(zone.matchValue!); } catch { /* fallback */ }
+            return (
+              <DroppableZone key={zone.id} id={zone.id} coords={coords} placed={answer[zone.id]} />
+            );
+          })}
+        </div>
+        <div>
+          <p className="text-sm text-gray-500 mb-2">Labels:</p>
+          <div className="flex flex-wrap gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+            {[...zones, ...distractors].map((opt) => (
+              <DraggableLabel key={opt.id} id={opt.id} content={opt.content} />
+            ))}
+          </div>
+        </div>
+        <DragOverlay>
+          {activeContent && (
+            <span className="inline-block px-3 py-1 border-2 border-black bg-yellow-100 font-medium text-sm rounded shadow-lg cursor-grabbing">
+              {activeContent}
+            </span>
+          )}
+        </DragOverlay>
+      </DndContext>
     </div>
   );
 }

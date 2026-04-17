@@ -41,6 +41,9 @@ export declare class QuestionsController {
             totalPages: number;
         };
     }>;
+    uploadImage(file: Express.Multer.File): {
+        url: string;
+    };
     findOne(id: string, req: any): Promise<{
         options: {
             id: string;

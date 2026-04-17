@@ -51,6 +51,7 @@ async function bootstrap() {
     app.use('/scorm/content', express.static(path.join(process.cwd(), 'public', 'scorm'), {
         index: false,
     }));
+    app.use('/uploads/images', express.static(path.join(process.cwd(), 'public', 'uploads', 'images')));
     app.enableCors({
         origin: (origin, callback) => {
             if (!origin)

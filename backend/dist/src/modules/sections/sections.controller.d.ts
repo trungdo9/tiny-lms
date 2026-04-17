@@ -6,12 +6,13 @@ export declare class SectionsController {
     findByCourse(courseId: string): Promise<({
         lessons: {
             id: string;
+            title: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
+            type: string;
             orderIndex: number;
             courseId: string;
-            type: string;
+            sectionId: string;
             content: string | null;
             videoUrl: string | null;
             videoProvider: string | null;
@@ -19,27 +20,27 @@ export declare class SectionsController {
             durationMins: number | null;
             isPreview: boolean;
             isPublished: boolean;
+            prerequisiteLessonId: string | null;
             availableAfterDays: number | null;
             availableFrom: Date | null;
-            sectionId: string;
-            prerequisiteLessonId: string | null;
         }[];
     } & {
         id: string;
-        createdAt: Date;
         title: string;
+        createdAt: Date;
         orderIndex: number;
         courseId: string;
     })[]>;
     findOne(id: string): Promise<{
         lessons: {
             id: string;
+            title: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
+            type: string;
             orderIndex: number;
             courseId: string;
-            type: string;
+            sectionId: string;
             content: string | null;
             videoUrl: string | null;
             videoProvider: string | null;
@@ -47,29 +48,28 @@ export declare class SectionsController {
             durationMins: number | null;
             isPreview: boolean;
             isPublished: boolean;
+            prerequisiteLessonId: string | null;
             availableAfterDays: number | null;
             availableFrom: Date | null;
-            sectionId: string;
-            prerequisiteLessonId: string | null;
         }[];
     } & {
         id: string;
-        createdAt: Date;
         title: string;
+        createdAt: Date;
         orderIndex: number;
         courseId: string;
     }>;
     create(courseId: string, dto: CreateSectionDto, req: any): Promise<{
         id: string;
-        createdAt: Date;
         title: string;
+        createdAt: Date;
         orderIndex: number;
         courseId: string;
     }>;
     update(id: string, dto: UpdateSectionDto, req: any): Promise<{
         id: string;
-        createdAt: Date;
         title: string;
+        createdAt: Date;
         orderIndex: number;
         courseId: string;
     }>;

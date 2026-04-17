@@ -35,10 +35,13 @@ Think harder to start working on the following plan follow the Orchestration Pro
 
 * Read every step of the plan, map dependencies, and list ambiguities.
 **IMPORTANT:** Analyze the skills catalog and activate the skills that are needed for the task during the process.
+* System will automatically load appropriate skills based on project context (language, framework, database) from the implementation plan.
 
 ### Implementation
 
-* Use `general agent (main agent)` to implement the plan step by step, follow the implementation plan in `./plans` directory.
+* Use `frontend-developer` or `backend-developer` agent to implement the plan step by step, follow the implementation plan in `./plans` directory.
+* For frontend tasks (UI, components, pages), delegate to `frontend-developer`
+* For backend tasks (APIs, database, server), delegate to `backend-developer`
 * Use `project-manager` to regularly update the progress and status of the plan and phases to keep stakeholders informed.
 * Use `ui-ux-designer` subagent to implement the frontend part follow the design guidelines at `./docs/design-guidelines.md` file.
   * Use `ai-multimodal` skill to generate image assets.
@@ -49,14 +52,14 @@ Think harder to start working on the following plan follow the Orchestration Pro
 ### Testing
 
 * Write the tests for the plan, **make sure you don't use fake data, mocks, cheats, tricks, temporary solutions, just to pass the build or github actions**, tests should be real and cover all possible cases.
-* Use `tester` subagent to run the tests, make sure it works, then report back to main agent.
-* If there are issues or failed tests, use `debugger` subagent to find the root cause of the issues, then ask main agent to fix all of them and 
+* Use `tester` subagent to run the tests, make sure it works, then report back to implementer agent.
+* If there are issues or failed tests, use `debugger` subagent to find the root cause of the issues, then ask implementer agent to fix all of them and 
 * Repeat the process until all tests pass or no more issues are reported. Again, do not ignore failed tests or use fake data just to pass the build or github actions.
 * Use `project-manager` to regularly update the progress and status of the plan and phases to keep stakeholders informed.
 
 ### Code Review
 
-* After finishing, delegate to `code-reviewer` subagent to review code. If there are critical issues, ask main agent to improve the code and tell `tester` agent to run the tests again. 
+* After finishing, delegate to `code-reviewer` subagent to review code. If there are critical issues, ask implementer agent to improve the code and tell `tester` agent to run the tests again. 
 * Repeat the "Testing" process until all tests pass.
 * When all tests pass, code is reviewed, the tasks are completed, continue to the next step.
 * Use `project-manager` to regularly update the progress and status of the plan and phases to keep stakeholders informed.
@@ -72,7 +75,7 @@ Think harder to start working on the following plan follow the Orchestration Pro
 * **IMPORTANT:** Sacrifice grammar for the sake of concision when writing outputs.
 
 **If user rejects the changes:**
-* Ask user to explain the issues and ask main agent to fix all of them and repeat the process.
+* Ask user to explain the issues and ask implementer agent to fix all of them and repeat the process.
 * Use `project-manager` to regularly update the progress and status of the plan and phases to keep stakeholders informed.
 
 ### Onboarding

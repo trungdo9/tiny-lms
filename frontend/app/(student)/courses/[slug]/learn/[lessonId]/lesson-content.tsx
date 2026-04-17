@@ -6,6 +6,7 @@ import { ActivityList } from '@/components/activity';
 import { FlashCardStudy } from '@/components/flash-card';
 import { Button } from '@/components/retroui/Button';
 import { Layers, X } from 'lucide-react';
+import { getVideoEmbedUrl } from '@/lib/video-utils';
 
 interface Lesson {
   id: string;
@@ -15,19 +16,6 @@ interface Lesson {
   video_url: string;
   video_provider: string;
   pdf_url: string;
-}
-
-function getVideoEmbedUrl(url: string, provider: string) {
-  if (!url) return null;
-  if (provider === 'youtube') {
-    const id = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
-    return id ? `https://www.youtube.com/embed/${id[1]}` : null;
-  }
-  if (provider === 'vimeo') {
-    const id = url.match(/vimeo\.com\/(\d+)/);
-    return id ? `https://player.vimeo.com/video/${id[1]}` : null;
-  }
-  return url;
 }
 
 interface LessonContentProps {

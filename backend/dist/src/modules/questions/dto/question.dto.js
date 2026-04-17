@@ -14,7 +14,7 @@ const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
 const question_difficulty_util_1 = require("../question-difficulty.util");
-exports.VALID_QUESTION_TYPES = ['single', 'multi', 'true_false', 'short_answer', 'essay', 'matching', 'ordering', 'cloze'];
+exports.VALID_QUESTION_TYPES = ['single', 'multi', 'true_false', 'short_answer', 'essay', 'matching', 'ordering', 'cloze', 'drag_drop_text', 'drag_drop_image'];
 exports.VALID_DIFFICULTIES = [...question_difficulty_util_1.CANONICAL_QUESTION_DIFFICULTIES];
 class CreateOptionDto {
     content;

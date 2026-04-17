@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getVideoEmbedUrl, isEmbedProvider } from '@/lib/video-utils';
 import {
   DndContext,
   closestCenter,
@@ -49,7 +50,6 @@ interface ActivityListProps {
   activities: Activity[];
   isInstructor?: boolean;
   onStartFlashCards?: () => void;
-  onPlayVideo?: (contentUrl: string, contentType?: string) => void;
 }
 
 const activityIcons: Record<string, string> = {
@@ -73,13 +73,11 @@ export function ActivityList({
   activities,
   isInstructor = false,
   onStartFlashCards,
-  onPlayVideo,
 }: ActivityListProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
-  const [currentVideo, setCurrentVideo] = useState<{ url: string; type?: string } | null>(null);
+  const [openVideoId, setOpenVideoId] = useState<string | null>(null);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
 
   const sensors = useSensors(
@@ -134,22 +132,12 @@ export function ActivityList({
         }
         break;
       case 'video':
+        setOpenVideoId((prev) => (prev === activity.id ? null : activity.id));
+        break;
       case 'file':
-        if (activity.content_url) {
-          if (onPlayVideo) {
-            onPlayVideo(activity.content_url, activity.content_type);
-          } else {
-            setCurrentVideo({ url: activity.content_url, type: activity.content_type });
-            setShowVideo(true);
-          }
-        }
+        if (activity.content_url) window.open(activity.content_url, '_blank');
         break;
     }
-  };
-
-  const handleCloseVideo = () => {
-    setShowVideo(false);
-    setCurrentVideo(null);
   };
 
   return (
@@ -196,25 +184,29 @@ export function ActivityList({
           <SortableContext items={activities.map((a) => a.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {activities.map((activity) => (
-                <SortableActivityItem
-                  key={activity.id}
-                  activity={activity}
-                  isInstructor={isInstructor}
-                  onEdit={() => setEditingActivity(activity)}
-                  onDelete={() => handleDelete(activity.id)}
-                  onClick={() => handleActivityClick(activity)}
-                  isDeletePending={deleteMutation.isPending}
-                />
+                <div key={activity.id}>
+                  <SortableActivityItem
+                    activity={activity}
+                    isInstructor={isInstructor}
+                    onEdit={() => setEditingActivity(activity)}
+                    onDelete={() => handleDelete(activity.id)}
+                    onClick={() => handleActivityClick(activity)}
+                    isDeletePending={deleteMutation.isPending}
+                    openVideoId={openVideoId}
+                  />
+                  {!isInstructor && activity.activity_type === 'video' && openVideoId === activity.id && (
+                    <ActivityVideoPlayer
+                      url={activity.content_url ?? ''}
+                      provider={activity.content_type ?? ''}
+                    />
+                  )}
+                </div>
               ))}
             </div>
           </SortableContext>
         </DndContext>
       )}
 
-      {/* Video Player Modal */}
-      {showVideo && currentVideo && (
-        <VideoModal url={currentVideo.url} type={currentVideo.type} onClose={handleCloseVideo} />
-      )}
     </div>
   );
 }
@@ -227,6 +219,7 @@ function SortableActivityItem({
   onDelete,
   onClick,
   isDeletePending,
+  openVideoId,
 }: {
   activity: Activity;
   isInstructor: boolean;
@@ -234,6 +227,7 @@ function SortableActivityItem({
   onDelete: () => void;
   onClick: () => void;
   isDeletePending: boolean;
+  openVideoId?: string | null;
 }) {
   const {
     attributes,
@@ -309,7 +303,9 @@ function SortableActivityItem({
           >
             {activity.activity_type === 'quiz' ? 'Start' :
              activity.activity_type === 'flashcard' ? 'Study' :
-             activity.activity_type === 'assignment' ? 'View' : 'View'}
+             activity.activity_type === 'video'
+               ? openVideoId === activity.id ? 'Close' : 'Watch'
+               : 'View'}
           </button>
         )}
       </div>
@@ -335,45 +331,24 @@ function getActivityInfo(activity: Activity) {
   }
 }
 
-// Video Player Modal Component
-function VideoModal({ url, type, onClose }: { url: string; type?: string; onClose: () => void }) {
-  const getEmbedUrl = (url: string, type?: string) => {
-    if (type === 'youtube') {
-      const id = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
-      return id ? `https://www.youtube.com/embed/${id[1]}` : url;
-    }
-    if (type === 'vimeo') {
-      const id = url.match(/vimeo\.com\/(\d+)/);
-      return id ? `https://player.vimeo.com/video/${id[1]}` : url;
-    }
-    return url;
-  };
-
-  const isEmbeddable = type === 'youtube' || type === 'vimeo';
+// Inline video player sub-component (student view only)
+function ActivityVideoPlayer({ url, provider }: { url: string; provider: string }) {
+  const embedUrl = getVideoEmbedUrl(url, provider);
+  if (!embedUrl) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="max-w-5xl w-full bg-black border-[4px] border-black shadow-[8px_8px_0px_0px_#000]">
-        <div className="flex items-center justify-between p-4 border-b border-black">
-          <h3 className="text-white font-bold">Video Player</h3>
-          <button
-            onClick={onClose}
-            className="px-3 py-1 bg-white text-black border-[2px] border-black hover:bg-gray-100 text-sm font-bold"
-          >
-            Close
-          </button>
-        </div>
-        <div className="aspect-video w-full">
-          {isEmbeddable ? (
-            <iframe
-              src={getEmbedUrl(url, type)}
-              className="w-full h-full"
-              allowFullScreen
-            />
-          ) : (
-            <video src={url} controls className="w-full h-full" />
-          )}
-        </div>
+    <div className="border-[4px] border-black shadow-[8px_8px_0px_0px_#000] bg-black overflow-hidden mt-1">
+      <div className="aspect-video w-full">
+        {isEmbedProvider(provider) ? (
+          <iframe
+            src={embedUrl}
+            className="w-full h-full"
+            allowFullScreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          />
+        ) : (
+          <video src={embedUrl} controls className="w-full h-full" />
+        )}
       </div>
     </div>
   );

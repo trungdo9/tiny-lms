@@ -5,12 +5,13 @@ export declare class LessonsController {
     constructor(lessonsService: LessonsService);
     findBySection(sectionId: string): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
+        type: string;
         orderIndex: number;
         courseId: string;
-        type: string;
+        sectionId: string;
         content: string | null;
         videoUrl: string | null;
         videoProvider: string | null;
@@ -18,10 +19,9 @@ export declare class LessonsController {
         durationMins: number | null;
         isPreview: boolean;
         isPublished: boolean;
+        prerequisiteLessonId: string | null;
         availableAfterDays: number | null;
         availableFrom: Date | null;
-        sectionId: string;
-        prerequisiteLessonId: string | null;
     }[]>;
     findOne(id: string): Promise<{
         section: {
@@ -31,12 +31,13 @@ export declare class LessonsController {
         };
     } & {
         id: string;
+        title: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
+        type: string;
         orderIndex: number;
         courseId: string;
-        type: string;
+        sectionId: string;
         content: string | null;
         videoUrl: string | null;
         videoProvider: string | null;
@@ -44,19 +45,18 @@ export declare class LessonsController {
         durationMins: number | null;
         isPreview: boolean;
         isPublished: boolean;
+        prerequisiteLessonId: string | null;
         availableAfterDays: number | null;
         availableFrom: Date | null;
-        sectionId: string;
-        prerequisiteLessonId: string | null;
     }>;
     findOneForLearning(id: string, req: any): Promise<{
         userProgress: {
             id: string;
             updatedAt: Date;
             courseId: string;
+            userId: string;
             lessonId: string;
             completedAt: Date | null;
-            userId: string;
             isCompleted: boolean;
             lastPosition: number;
         } | null;
@@ -66,12 +66,13 @@ export declare class LessonsController {
             courseId: string;
         };
         id: string;
+        title: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
+        type: string;
         orderIndex: number;
         courseId: string;
-        type: string;
+        sectionId: string;
         content: string | null;
         videoUrl: string | null;
         videoProvider: string | null;
@@ -79,19 +80,19 @@ export declare class LessonsController {
         durationMins: number | null;
         isPreview: boolean;
         isPublished: boolean;
+        prerequisiteLessonId: string | null;
         availableAfterDays: number | null;
         availableFrom: Date | null;
-        sectionId: string;
-        prerequisiteLessonId: string | null;
     }>;
     create(sectionId: string, dto: CreateLessonDto, req: any): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
+        type: string;
         orderIndex: number;
         courseId: string;
-        type: string;
+        sectionId: string;
         content: string | null;
         videoUrl: string | null;
         videoProvider: string | null;
@@ -99,19 +100,19 @@ export declare class LessonsController {
         durationMins: number | null;
         isPreview: boolean;
         isPublished: boolean;
+        prerequisiteLessonId: string | null;
         availableAfterDays: number | null;
         availableFrom: Date | null;
-        sectionId: string;
-        prerequisiteLessonId: string | null;
     }>;
     update(id: string, dto: UpdateLessonDto, req: any): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
+        type: string;
         orderIndex: number;
         courseId: string;
-        type: string;
+        sectionId: string;
         content: string | null;
         videoUrl: string | null;
         videoProvider: string | null;
@@ -119,10 +120,9 @@ export declare class LessonsController {
         durationMins: number | null;
         isPreview: boolean;
         isPublished: boolean;
+        prerequisiteLessonId: string | null;
         availableAfterDays: number | null;
         availableFrom: Date | null;
-        sectionId: string;
-        prerequisiteLessonId: string | null;
     }>;
     delete(id: string, req: any): Promise<{
         success: boolean;

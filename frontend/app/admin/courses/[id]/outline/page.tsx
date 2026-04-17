@@ -612,7 +612,7 @@ function LessonItem({
       : 'bg-gray-100 text-gray-600'
     }`
   }
-  onClick = {() => router.push(`/admin/flash-cards/${lesson.flashCards.id}`)
+  onClick = {() => router.push(`/admin/flash-cards/create?lessonId=${lesson.id}`)
 }
 title = "Quản lý flash cards"
   >

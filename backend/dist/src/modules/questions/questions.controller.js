@@ -1,10 +1,43 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
@@ -15,6 +48,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuestionsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path = __importStar(require("path"));
+const crypto_1 = require("crypto");
+const fs = __importStar(require("fs"));
 const supabase_auth_guard_1 = require("../../common/guards/supabase-auth.guard");
 const questions_service_1 = require("./questions.service");
 const questions_management_service_1 = require("./questions-management.service");
@@ -28,6 +66,9 @@ let QuestionsController = class QuestionsController {
     }
     findAll(bankId, req, query) {
         return this.service.findAll(bankId, req.user.id, req.user.role, query);
+    }
+    uploadImage(file) {
+        return { url: `/uploads/images/${file.filename}` };
     }
     findOne(id, req) {
         return this.service.findOne(id, req.user.id, req.user.role);
@@ -71,6 +112,39 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, question_dto_1.ListQuestionsQueryDto]),
     __metadata("design:returntype", void 0)
 ], QuestionsController.prototype, "findAll", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Upload an image for drag_drop_image questions' }),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Image uploaded, returns { url }' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Not an image or exceeds 5MB' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, common_1.Post)('upload-image'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: (_req, _file, cb) => {
+                const dest = path.join(process.cwd(), 'public', 'uploads', 'images');
+                fs.mkdirSync(dest, { recursive: true });
+                cb(null, dest);
+            },
+            filename: (_req, file, cb) => {
+                cb(null, `${(0, crypto_1.randomUUID)()}${path.extname(file.originalname)}`);
+            },
+        }),
+        limits: { fileSize: 5 * 1024 * 1024 },
+        fileFilter: (_req, file, cb) => {
+            if (!file.mimetype.startsWith('image/')) {
+                cb(new common_1.BadRequestException('Only images allowed'), false);
+            }
+            else {
+                cb(null, true);
+            }
+        },
+    })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], QuestionsController.prototype, "uploadImage", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get a single question by ID with usage count' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Question detail' }),

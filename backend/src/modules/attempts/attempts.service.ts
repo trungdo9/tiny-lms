@@ -218,12 +218,32 @@ export class AttemptsService {
         question: {
           content: aq.question.content,
           type: aq.question.type,
+          mediaUrl: (aq.question as any).mediaUrl,
           explanation: attempt.status !== 'in_progress' ? aq.question.explanation : undefined,
-          options: aq.question.options?.map((o: any) => ({
-            id: o.id,
-            content: o.content,
-            isCorrect: attempt.quiz.showCorrectAnswer || attempt.status !== 'in_progress' ? o.isCorrect : undefined,
-          })),
+          options: aq.question.options?.map((o: any) => {
+            const isActive = attempt.status === 'in_progress';
+            const type = aq.question.type;
+
+            // drag_drop_text: strip matchKey (reveals slot) + isCorrect
+            if (type === 'drag_drop_text') {
+              return { id: o.id, content: o.content, orderIndex: o.orderIndex };
+            }
+
+            // drag_drop_image: expose matchValue (zone coords) but strip matchKey + isCorrect
+            if (type === 'drag_drop_image') {
+              return { id: o.id, content: o.content, orderIndex: o.orderIndex, matchValue: o.matchValue };
+            }
+
+            // All other types: expose matchKey + matchValue
+            return {
+              id: o.id,
+              content: o.content,
+              orderIndex: o.orderIndex,
+              matchKey: o.matchKey,
+              matchValue: o.matchValue,
+              isCorrect: (!isActive || attempt.quiz.showCorrectAnswer) ? o.isCorrect : undefined,
+            };
+          }),
         },
         answer: answersMap.get(aq.questionId),
       })),
@@ -435,6 +455,38 @@ export class AttemptsService {
             if (clozeScore > 0) {
               isCorrect = clozeScore === 1;
               scoreEarned = Math.round(clozeScore * Number(question.defaultScore));
+            }
+          }
+        } else if (question.type === 'drag_drop_text') {
+          // matchAnswer keys = slot string IDs ("slot_0", "slot_1")
+          const matchAnswer = answer.matchAnswer as Record<string, string> | null;
+          if (matchAnswer) {
+            const correctTokens = question.options.filter((o: any) => o.isCorrect && o.matchKey);
+            let correctCount = 0;
+            for (const token of correctTokens) {
+              const placed = token.matchKey ? matchAnswer[token.matchKey] : undefined;
+              if (placed?.trim().toLowerCase() === token.content.trim().toLowerCase()) correctCount++;
+            }
+            if (correctTokens.length > 0) {
+              const ratio = correctCount / correctTokens.length;
+              isCorrect = ratio === 1;
+              scoreEarned = Math.round(ratio * Number(question.defaultScore));
+            }
+          }
+        } else if (question.type === 'drag_drop_image') {
+          // matchAnswer keys = zone option UUIDs
+          const matchAnswer = answer.matchAnswer as Record<string, string> | null;
+          if (matchAnswer) {
+            const zones = question.options.filter((o: any) => o.isCorrect && o.matchKey);
+            let correctCount = 0;
+            for (const zone of zones) {
+              const placed = matchAnswer[zone.id];
+              if (placed?.trim().toLowerCase() === zone.content.trim().toLowerCase()) correctCount++;
+            }
+            if (zones.length > 0) {
+              const ratio = correctCount / zones.length;
+              isCorrect = ratio === 1;
+              scoreEarned = Math.round(ratio * Number(question.defaultScore));
             }
           }
         }

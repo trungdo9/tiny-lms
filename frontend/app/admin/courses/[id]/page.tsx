@@ -407,7 +407,7 @@ function LessonRow({
                   ? 'bg-purple-100 text-purple-700'
                   : 'bg-gray-100 text-gray-700'
               }`}
-              onClick={() => router.push(`/admin/flash-cards/${lesson.flashCards.id}`)}
+              onClick={() => router.push(`/admin/flash-cards/create?lessonId=${lesson.id}`)}
               title="Quản lý flash cards"
             >
               📇 {lesson.flashCards._count?.cards || lesson.flashCards.cards?.length || 0} cards

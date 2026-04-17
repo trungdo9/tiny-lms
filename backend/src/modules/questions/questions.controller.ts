@@ -1,5 +1,10 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, Request, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiConsumes } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+import { randomUUID } from 'crypto';
+import * as fs from 'fs';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { QuestionsService } from './questions.service';
 import { QuestionsManagementService } from './questions-management.service';
@@ -30,6 +35,36 @@ export class QuestionsController {
   @Get('bank/:bankId')
   findAll(@Param('bankId') bankId: string, @Request() req: any, @Query() query: ListQuestionsQueryDto) {
     return this.service.findAll(bankId, req.user.id, req.user.role, query);
+  }
+
+  @ApiOperation({ summary: 'Upload an image for drag_drop_image questions' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 201, description: 'Image uploaded, returns { url }' })
+  @ApiResponse({ status: 400, description: 'Not an image or exceeds 5MB' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: (_req, _file, cb) => {
+        const dest = path.join(process.cwd(), 'public', 'uploads', 'images');
+        fs.mkdirSync(dest, { recursive: true });
+        cb(null, dest);
+      },
+      filename: (_req, file, cb) => {
+        cb(null, `${randomUUID()}${path.extname(file.originalname)}`);
+      },
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      if (!file.mimetype.startsWith('image/')) {
+        cb(new BadRequestException('Only images allowed'), false);
+      } else {
+        cb(null, true);
+      }
+    },
+  }))
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    return { url: `/uploads/images/${file.filename}` };
   }
 
   @ApiOperation({ summary: 'Get a single question by ID with usage count' })

@@ -264,12 +264,30 @@ export declare class AttemptsController {
             question: {
                 content: string;
                 type: string;
+                mediaUrl: any;
                 explanation: string | null | undefined;
-                options: {
+                options: ({
                     id: any;
                     content: any;
+                    orderIndex: any;
+                    matchValue?: undefined;
+                    matchKey?: undefined;
+                    isCorrect?: undefined;
+                } | {
+                    id: any;
+                    content: any;
+                    orderIndex: any;
+                    matchValue: any;
+                    matchKey?: undefined;
+                    isCorrect?: undefined;
+                } | {
+                    id: any;
+                    content: any;
+                    orderIndex: any;
+                    matchKey: any;
+                    matchValue: any;
                     isCorrect: any;
-                }[];
+                })[];
             };
             answer: {
                 id: string;

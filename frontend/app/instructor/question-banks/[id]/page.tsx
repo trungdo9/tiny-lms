@@ -41,7 +41,23 @@ const QUESTION_TYPES = [
   { value: 'matching', label: 'Matching' },
   { value: 'ordering', label: 'Ordering' },
   { value: 'cloze', label: 'Fill in the Blank (Cloze)' },
+  { value: 'drag_drop_text', label: 'Drag Words into Blanks' },
+  { value: 'drag_drop_image', label: 'Drag Labels onto Image' },
 ];
+
+async function uploadImage(file: File): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(`${API}/questions/upload-image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${session?.access_token}` },
+    body: form,
+  });
+  if (!res.ok) throw new Error('Image upload failed');
+  const { url } = await res.json();
+  return url; // "/uploads/images/filename.jpg"
+}
 
 async function fetchQuestionBank(bankId: string): Promise<QuestionBank> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -70,6 +86,19 @@ export default function QuestionBankPage() {
   const [error, setError] = useState('');
   const [editQuestion, setEditQuestion] = useState<Question | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
+
+  // drag_drop_text state
+  const [ddtTokens, setDdtTokens] = useState<{ content: string; slotId: string | null }[]>([]);
+  const [ddtNewToken, setDdtNewToken] = useState('');
+  const [ddtNewSlot, setDdtNewSlot] = useState<string | null>(null);
+
+  // drag_drop_image state
+  const [ddiImageUrl, setDdiImageUrl] = useState('');
+  const [ddiUploading, setDdiUploading] = useState(false);
+  const [ddiZones, setDdiZones] = useState<{ id: string; label: string; x: number; y: number }[]>([]);
+  const [ddiDistractors, setDdiDistractors] = useState<string[]>([]);
+  const [ddiNewDistractor, setDdiNewDistractor] = useState('');
 
   // Create question state
   const [newQuestion, setNewQuestion] = useState({
@@ -93,6 +122,10 @@ export default function QuestionBankPage() {
     queryFn: () => fetchQuestions(bankId),
     enabled: !!bankId,
   });
+
+  const filteredQuestions = difficultyFilter === 'all'
+    ? questions
+    : questions.filter(q => q.difficulty === difficultyFilter);
 
   // Delete question mutation
   const deleteMutation = useMutation({
@@ -177,6 +210,8 @@ export default function QuestionBankPage() {
       const needsMatching = newQuestion.type === 'matching';
       const needsOrdering = newQuestion.type === 'ordering';
       const needsCloze = newQuestion.type === 'cloze';
+      const needsDragText = newQuestion.type === 'drag_drop_text';
+      const needsDragImage = newQuestion.type === 'drag_drop_image';
 
       if (!newQuestion.content.trim()) {
         throw new Error('Question content is required');
@@ -201,6 +236,17 @@ export default function QuestionBankPage() {
       if (needsCloze) {
         const validAnswers = newQuestion.options.filter(o => o.content.trim());
         if (validAnswers.length < 1) throw new Error('At least 1 correct answer is required');
+      }
+
+      if (needsDragText) {
+        if (!newQuestion.content.match(/\[slot_\d+\]/)) throw new Error('Content must include at least one [slot_N] marker');
+        if (!ddtTokens.some(t => t.slotId)) throw new Error('At least one correct token with a slot is required');
+      }
+
+      if (needsDragImage) {
+        if (!ddiImageUrl) throw new Error('An image is required for drag-label questions');
+        if (ddiZones.length === 0) throw new Error('Click the image to add at least one zone');
+        if (ddiZones.some(z => !z.label.trim())) throw new Error('All zones must have a label');
       }
 
       const { data: { session } } = await supabase.auth.getSession();
@@ -236,10 +282,28 @@ export default function QuestionBankPage() {
       } else if (needsCloze) {
         payload.options = newQuestion.options
           .filter(o => o.content.trim())
-          .map((o, idx) => ({
-            content: o.content,
+          .map((o) => ({ content: o.content, isCorrect: true }));
+      } else if (needsDragText) {
+        payload.options = ddtTokens.map(t => ({
+          content: t.content,
+          isCorrect: !!t.slotId,
+          matchKey: t.slotId ?? undefined,
+        }));
+      } else if (needsDragImage) {
+        payload.mediaUrl = `${API}${ddiImageUrl}`;
+        payload.mediaType = 'image';
+        payload.options = [
+          ...ddiZones.map((z, i) => ({
+            content: z.label,
             isCorrect: true,
-          }));
+            matchKey: `zone_${i}`,
+            matchValue: JSON.stringify({ x: z.x, y: z.y, w: 10, h: 8 }),
+          })),
+          ...ddiDistractors.filter(d => d.trim()).map(d => ({
+            content: d,
+            isCorrect: false,
+          })),
+        ];
       }
 
       const response = await fetch(`${API}/questions/bank/${bankId}`, {
@@ -259,13 +323,9 @@ export default function QuestionBankPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.questionBanks.questions(bankId) });
       setShowCreate(false);
-      setNewQuestion({
-        type: 'single',
-        content: '',
-        difficulty: 'medium',
-        defaultScore: 1,
-        options: [{ content: '', isCorrect: true }],
-      });
+      setNewQuestion({ type: 'single', content: '', difficulty: 'medium', defaultScore: 1, options: [{ content: '', isCorrect: true }] });
+      setDdtTokens([]); setDdtNewToken(''); setDdtNewSlot(null);
+      setDdiImageUrl(''); setDdiZones([]); setDdiDistractors([]); setDdiNewDistractor('');
     },
     onError: (err: Error) => {
       setError(err.message);
@@ -335,6 +395,9 @@ export default function QuestionBankPage() {
       newOptions = [{ content: '', isCorrect: true }];
     }
     setNewQuestion({ ...newQuestion, type, options: newOptions });
+    // reset drag-drop state
+    setDdtTokens([]); setDdtNewToken(''); setDdtNewSlot(null);
+    setDdiImageUrl(''); setDdiZones([]); setDdiDistractors([]); setDdiNewDistractor('');
   };
 
   const hasOptions = (type: string) => ['single', 'multi', 'true_false', 'matching', 'ordering', 'cloze'].includes(type);
@@ -387,6 +450,32 @@ export default function QuestionBankPage() {
           <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>
         )}
 
+        {/* Difficulty filter tabs */}
+        {questions.length > 0 && (
+          <div className="flex items-center gap-1 mb-4">
+            {(['all', 'easy', 'medium', 'hard'] as const).map((level) => {
+              const count = level === 'all' ? questions.length : questions.filter(q => q.difficulty === level).length;
+              const active = difficultyFilter === level;
+              const colors: Record<string, string> = {
+                all: active ? 'bg-gray-800 text-white' : 'bg-white text-gray-600 hover:bg-gray-50',
+                easy: active ? 'bg-green-600 text-white' : 'bg-white text-green-700 hover:bg-green-50',
+                medium: active ? 'bg-yellow-500 text-white' : 'bg-white text-yellow-700 hover:bg-yellow-50',
+                hard: active ? 'bg-red-600 text-white' : 'bg-white text-red-700 hover:bg-red-50',
+              };
+              return (
+                <button
+                  key={level}
+                  onClick={() => setDifficultyFilter(level)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${colors[level]}`}
+                >
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
+                  <span className="ml-1.5 text-xs opacity-75">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {questions.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <p className="text-gray-500 mb-4">No questions yet</p>
@@ -396,6 +485,10 @@ export default function QuestionBankPage() {
             >
               Add your first question
             </button>
+          </div>
+        ) : filteredQuestions.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <p className="text-gray-500">No {difficultyFilter} questions in this bank.</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -410,7 +503,7 @@ export default function QuestionBankPage() {
                 </tr>
               </thead>
               <tbody>
-                {questions.map((q) => (
+                {filteredQuestions.map((q) => (
                   <tr key={q.id} className="border-t">
                     <td className="px-4 py-3 max-w-md truncate">{q.content}</td>
                     <td className="px-4 py-3">
@@ -683,6 +776,156 @@ export default function QuestionBankPage() {
                         </div>
                       </>
                     )}
+                  </div>
+                )}
+
+                {/* Drag Words into Blanks */}
+                {newQuestion.type === 'drag_drop_text' && (
+                  <div className="space-y-3">
+                    <p className="text-xs text-gray-500">Use <code>[slot_0]</code>, <code>[slot_1]</code>… in the question content above to mark blanks.</p>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Tokens</label>
+                      {ddtTokens.map((t, i) => (
+                        <div key={i} className="flex items-center gap-2 mb-1">
+                          <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-sm">{t.content}</span>
+                          <span className="text-xs text-gray-500">{t.slotId ? `→ ${t.slotId}` : '(distractor)'}</span>
+                          <button type="button" onClick={() => setDdtTokens(ddtTokens.filter((_, j) => j !== i))} className="text-red-400 text-xs">✕</button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2 mt-2">
+                        <input
+                          type="text"
+                          value={ddtNewToken}
+                          onChange={e => setDdtNewToken(e.target.value)}
+                          placeholder="Token text"
+                          className="flex-1 p-2 border rounded text-sm"
+                        />
+                        <select
+                          value={ddtNewSlot ?? ''}
+                          onChange={e => setDdtNewSlot(e.target.value || null)}
+                          className="p-2 border rounded text-sm"
+                        >
+                          <option value="">distractor</option>
+                          {Array.from(newQuestion.content.matchAll(/\[slot_(\d+)\]/g)).map(m => (
+                            <option key={m[1]} value={`slot_${m[1]}`}>slot_{m[1]}</option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!ddtNewToken.trim()) return;
+                            setDdtTokens([...ddtTokens, { content: ddtNewToken.trim(), slotId: ddtNewSlot }]);
+                            setDdtNewToken('');
+                          }}
+                          className="px-3 py-2 bg-blue-600 text-white rounded text-sm"
+                        >Add</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Drag Labels onto Image */}
+                {newQuestion.type === 'drag_drop_image' && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                      {ddiImageUrl ? (
+                        <div className="space-y-2">
+                          <div
+                            className="relative w-full border rounded overflow-hidden cursor-crosshair"
+                            style={{ aspectRatio: '16/9' }}
+                            onClick={e => {
+                              const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                              const x = ((e.clientX - rect.left) / rect.width) * 100;
+                              const y = ((e.clientY - rect.top) / rect.height) * 100;
+                              setDdiZones([...ddiZones, { id: crypto.randomUUID(), label: '', x, y }]);
+                            }}
+                          >
+                            <img src={`${API}${ddiImageUrl}`} alt="Preview" className="w-full h-full object-contain bg-black" />
+                            {ddiZones.map(z => (
+                              <div
+                                key={z.id}
+                                style={{ position: 'absolute', left: `${z.x}%`, top: `${z.y}%`, transform: 'translate(-50%,-50%)' }}
+                                className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold"
+                                onClick={e => e.stopPropagation()}
+                              >●</div>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-500">Click image to place zone markers.</p>
+                          <button type="button" onClick={() => { setDdiImageUrl(''); setDdiZones([]); }} className="text-xs text-red-500 hover:underline">Remove image</button>
+                        </div>
+                      ) : (
+                        <label className={`flex items-center gap-2 px-3 py-2 border rounded cursor-pointer text-sm ${ddiUploading ? 'opacity-50' : 'hover:bg-gray-50'}`}>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={ddiUploading}
+                            onChange={async e => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              setDdiUploading(true);
+                              try {
+                                const url = await uploadImage(file);
+                                setDdiImageUrl(url);
+                              } catch (err: any) {
+                                setError(err.message);
+                              } finally {
+                                setDdiUploading(false);
+                              }
+                            }}
+                          />
+                          {ddiUploading ? 'Uploading…' : '+ Upload Image'}
+                        </label>
+                      )}
+                    </div>
+
+                    {ddiZones.length > 0 && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Zone Labels</label>
+                        {ddiZones.map((z, i) => (
+                          <div key={z.id} className="flex items-center gap-2 mb-1">
+                            <span className="text-xs text-gray-400">#{i + 1}</span>
+                            <input
+                              type="text"
+                              value={z.label}
+                              onChange={e => setDdiZones(ddiZones.map((zz, j) => j === i ? { ...zz, label: e.target.value } : zz))}
+                              placeholder={`Label for zone ${i + 1}`}
+                              className="flex-1 p-1.5 border rounded text-sm"
+                            />
+                            <button type="button" onClick={() => setDdiZones(ddiZones.filter((_, j) => j !== i))} className="text-red-400 text-xs">✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Distractors (optional)</label>
+                      {ddiDistractors.map((d, i) => (
+                        <div key={i} className="flex items-center gap-2 mb-1">
+                          <span className="flex-1 text-sm px-2 py-1 bg-gray-100 rounded">{d}</span>
+                          <button type="button" onClick={() => setDdiDistractors(ddiDistractors.filter((_, j) => j !== i))} className="text-red-400 text-xs">✕</button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={ddiNewDistractor}
+                          onChange={e => setDdiNewDistractor(e.target.value)}
+                          placeholder="Distractor label"
+                          className="flex-1 p-2 border rounded text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!ddiNewDistractor.trim()) return;
+                            setDdiDistractors([...ddiDistractors, ddiNewDistractor.trim()]);
+                            setDdiNewDistractor('');
+                          }}
+                          className="px-3 py-2 bg-gray-200 rounded text-sm"
+                        >Add</button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

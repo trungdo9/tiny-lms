@@ -12,7 +12,14 @@ export class CoursesService {
   ) { }
 
   private shouldUseSupabaseFallback(error: any) {
-    return ['ENETUNREACH', 'P1001'].includes(error?.code) || /ENETUNREACH|Can't reach database server|connect ENETUNREACH/i.test(String(error?.message || ''));
+    const code = error?.code;
+    const msg = String(error?.message || '');
+    const prismaConnectCodes = ['P1000', 'P1001', 'P1002', 'P1017'];
+    return (
+      prismaConnectCodes.includes(code) ||
+      code === 'ENETUNREACH' ||
+      /ENETUNREACH|Can't reach database server|connect ENETUNREACH|Tenant or user not found|password authentication failed|Connection refused|connection timed out|SSL connection error/i.test(msg)
+    );
   }
 
   private async getPublicCoursesFromSupabase(query: CourseQueryDto) {
@@ -242,7 +249,13 @@ export class CoursesService {
       };
     } catch (error) {
       if (!this.shouldUseSupabaseFallback(error)) throw error;
-      return this.getPublicCoursesFromSupabase(query);
+      try {
+        return await this.getPublicCoursesFromSupabase(query);
+      } catch {
+        const page = query.page || 1;
+        const limit = query.limit || 10;
+        return { data: [], pagination: { page, limit, total: 0, totalPages: 0 } };
+      }
     }
   }
 
@@ -378,7 +391,11 @@ export class CoursesService {
       });
     } catch (error) {
       if (!this.shouldUseSupabaseFallback(error)) throw error;
-      return this.getPublicCategoriesFromSupabase();
+      try {
+        return await this.getPublicCategoriesFromSupabase();
+      } catch {
+        return [];
+      }
     }
   }
 

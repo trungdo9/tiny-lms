@@ -3,9 +3,18 @@
 **IMPORTANT:** Analyze the skills catalog and activate the skills that are needed for the task during the process.
 **IMPORTANT**: Ensure token efficiency while maintaining high quality.
 
-#### 1. Code Implementation
-- Before you start, delegate to `planner` agent to create a implementation plan with TODO tasks in `./plans` directory.
+#### 1. Planning
+- Before implementation starts, delegate to `planner` agent to create an implementation plan with TODO tasks in `./plans` directory.
 - When in planning phase, use multiple `researcher` agents in parallel to conduct research on different relevant technical topics and report back to `planner` agent to create implementation plan.
+- Present the generated plan to the user for approval before any coding begins.
+
+#### 2. Plan Review & Clear Context
+- Complete a **Plan Review** before coding begins.
+- After the user approves the plan, the user should run `/clear` to start a fresh implementation context.
+- Treat `/clear` as a user-triggered context reset between planning and coding, not as an internal subagent step.
+- Begin coding only after the approved plan handoff is complete.
+
+#### 3. Implementation
 - Write clean, readable, and maintainable code
 - Follow established architectural patterns
 - Implement features according to specifications
@@ -13,7 +22,7 @@
 - **DO NOT** create new enhanced files, update to the existing files directly.
 - **[IMPORTANT]** After creating or modifying code file, run compile command/script to check for any compile errors.
 
-#### 2. Testing
+#### 4. Testing
 - Delegate to `tester` agent to run tests and analyze the summary report.
   - Write comprehensive unit tests
   - Ensure high code coverage
@@ -23,14 +32,14 @@
 - **IMPORTANT:** make sure you don't use fake data, mocks, cheats, tricks, temporary solutions, just to pass the build or github actions.
 - **IMPORTANT:** Always fix failing tests follow the recommendations and delegate to `tester` agent to run tests again, only finish your session when all tests pass.
 
-#### 3. Code Quality
+#### 5. Code Review
 - After finish implementation, delegate to `code-reviewer` agent to review code.
 - Follow coding standards and conventions
 - Write self-documenting code
 - Add meaningful comments for complex logic
 - Optimize for performance and maintainability
 
-#### 4. Integration
+#### 6. Integration & Documentation
 - Always follow the plan given by `planner` agent
 - Ensure seamless integration with existing code
 - Follow API contracts precisely
@@ -38,8 +47,8 @@
 - Document breaking changes
 - Delegate to `docs-manager` agent to update docs in `./docs` directory if any.
 
-#### 5. Debugging
+#### 7. Debugging
 - When a user report bugs or issues on the server or a CI/CD pipeline, delegate to `debugger` agent to run tests and analyze the summary report.
 - Read the summary report from `debugger` agent and implement the fix.
 - Delegate to `tester` agent to run tests and analyze the summary report.
-- If the `tester` agent reports failed tests, fix them follow the recommendations and repeat from the **Step 2**.
+- If the `tester` agent reports failed tests, fix them follow the recommendations and repeat from the **Step 4**.

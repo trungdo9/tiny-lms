@@ -1,7 +1,7 @@
 # Plan: Question Difficulty Normalization
 
 **Date:** 2026-03-29 20:57
-**Status:** Phase 1 & 2 Complete
+**Status:** Complete
 **Priority:** Medium
 
 ## Overview
@@ -133,13 +133,13 @@ If there are stored `quiz_questions.difficulty_filter` values outside canonical 
 - Add regression tests around exact-match random-pick behavior
 
 ## Validation checklist
-- [ ] All question write APIs persist only `easy|medium|hard`
-- [ ] CSV/Excel import accepts approved aliases and rejects unknown labels with row-level errors
-- [ ] Existing rows are migrated/backfilled
-- [ ] Question list filters work with canonical values
-- [ ] Quiz bank random-pick with `difficultyFilter` returns expected questions
-- [ ] Instructor and admin UIs display consistent labels/colors
-- [ ] Tests cover normalization helper + representative service paths
+- [x] All question write APIs persist only `easy|medium|hard`
+- [x] CSV/Excel import accepts approved aliases and rejects unknown labels with row-level errors
+- [x] Existing rows are migrated/backfilled
+- [x] Question list filters work with canonical values
+- [x] Quiz bank random-pick with `difficultyFilter` returns expected questions
+- [x] Instructor and admin UIs display consistent labels/colors
+- [x] Tests cover normalization helper + representative service paths
 
 ## Suggested implementation order
 1. Measure existing DB values

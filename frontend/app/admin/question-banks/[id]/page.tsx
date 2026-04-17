@@ -70,6 +70,7 @@ export default function QuestionBankPage() {
   const [error, setError] = useState('');
   const [editQuestion, setEditQuestion] = useState<Question | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
 
   // Create question state
   const [newQuestion, setNewQuestion] = useState({
@@ -93,6 +94,10 @@ export default function QuestionBankPage() {
     queryFn: () => fetchQuestions(bankId),
     enabled: !!bankId,
   });
+
+  const filteredQuestions = difficultyFilter === 'all'
+    ? questions
+    : questions.filter(q => q.difficulty === difficultyFilter);
 
   // Delete question mutation
   const deleteMutation = useMutation({
@@ -387,6 +392,32 @@ export default function QuestionBankPage() {
           <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>
         )}
 
+        {/* Difficulty filter tabs */}
+        {questions.length > 0 && (
+          <div className="flex items-center gap-1 mb-4">
+            {(['all', 'easy', 'medium', 'hard'] as const).map((level) => {
+              const count = level === 'all' ? questions.length : questions.filter(q => q.difficulty === level).length;
+              const active = difficultyFilter === level;
+              const colors: Record<string, string> = {
+                all: active ? 'bg-gray-800 text-white' : 'bg-white text-gray-600 hover:bg-gray-50',
+                easy: active ? 'bg-green-600 text-white' : 'bg-white text-green-700 hover:bg-green-50',
+                medium: active ? 'bg-yellow-500 text-white' : 'bg-white text-yellow-700 hover:bg-yellow-50',
+                hard: active ? 'bg-red-600 text-white' : 'bg-white text-red-700 hover:bg-red-50',
+              };
+              return (
+                <button
+                  key={level}
+                  onClick={() => setDifficultyFilter(level)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${colors[level]}`}
+                >
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
+                  <span className="ml-1.5 text-xs opacity-75">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {questions.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <p className="text-gray-500 mb-4">No questions yet</p>
@@ -396,6 +427,10 @@ export default function QuestionBankPage() {
             >
               Add your first question
             </button>
+          </div>
+        ) : filteredQuestions.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <p className="text-gray-500">No {difficultyFilter} questions in this bank.</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -410,7 +445,7 @@ export default function QuestionBankPage() {
                 </tr>
               </thead>
               <tbody>
-                {questions.map((q) => (
+                {filteredQuestions.map((q) => (
                   <tr key={q.id} className="border-t">
                     <td className="px-4 py-3 max-w-md truncate">{q.content}</td>
                     <td className="px-4 py-3">

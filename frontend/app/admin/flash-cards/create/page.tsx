@@ -59,10 +59,8 @@ export default function FlashCardsEditorPage() {
     fetchLesson();
   }, [lessonId, deckId]);
 
-  const handleDeckCreated = (newDeck: FlashCardDeck) => {
-    if (newDeck.lesson_id) {
-      router.replace(`/admin/flash-cards/create?lessonId=${newDeck.lesson_id}`);
-    }
+  const handleDeckCreated = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.flashCards.deck(lessonId || '') });
   };
 
   if (isLoading) {
@@ -155,7 +153,7 @@ export default function FlashCardsEditorPage() {
 }
 
 // Separate component for creating deck
-function CreateDeckForm({ lessonId, onCreated }: { lessonId: string; onCreated: (deck: FlashCardDeck) => void }) {
+function CreateDeckForm({ lessonId, onCreated }: { lessonId: string; onCreated: () => void }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [shuffleCards, setShuffleCards] = useState(false);
@@ -166,7 +164,7 @@ function CreateDeckForm({ lessonId, onCreated }: { lessonId: string; onCreated: 
     setIsCreating(true);
     try {
       const deck = await flashCardsApi.createDeck(lessonId, { title, description, shuffleCards });
-      onCreated(deck as FlashCardDeck);
+      onCreated();
     } catch (error) {
       console.error(error);
     } finally {
